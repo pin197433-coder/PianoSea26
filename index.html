@@ -491,12 +491,12 @@
     <div class="vip-modal" id="vipModal">
         <div class="vip-content">
             <div class="vip-title">👑 升级 VIP 会员</div>
-            <p style="margin-bottom: 20px; opacity: 0.9;">解锁超长放松时长，享受完整体验</p>
+            <p style="margin-bottom: 20px; opacity: 0.9;">解锁全部放松时长，享受完整体验</p>
             
             <div class="vip-price">¥12<span style="font-size: 0.4em;">/月</span></div>
             
             <ul class="vip-features">
-                <li>解锁 30/60 分钟超长时长</li>
+                <li>解锁 25/30/60 分钟时长</li>
                 <li>专属高品质钢琴曲目</li>
                 <li>离线下载功能</li>
                 <li>无广告干扰</li>
@@ -569,9 +569,9 @@
         
         <div class="timer-display" id="timerDisplay">15:00</div>
         
-        <!-- 修改：只保留 15、30、60 分钟 -->
         <div class="timer-options">
             <button class="time-btn active" id="btn-15" onclick="handleTimeSelect(15)">15<span data-lang="min">分钟</span></button>
+            <button class="time-btn locked" id="btn-25" onclick="handleTimeSelect(25)">25<span data-lang="min">分钟</span> 🔒</button>
             <button class="time-btn locked" id="btn-30" onclick="handleTimeSelect(30)">30<span data-lang="min">分钟</span> 🔒</button>
             <button class="time-btn locked" id="btn-60" onclick="handleTimeSelect(60)">60<span data-lang="min">分钟</span> 🔒</button>
         </div>
@@ -796,8 +796,8 @@
         let voiceTimeout = null;
         let isVIP = false;
         
-        // 修改：VIP 时长改为 30 和 60 分钟（删除 25 分钟）
-        const VIP_TIMES = [30, 60];
+        // VIP 配置
+        const VIP_TIMES = [25, 30, 60];
         const FREE_TIME = 15;
         
         // 检查 VIP 状态
@@ -817,28 +817,24 @@
                 statusText.textContent = 'VIP 会员';
                 vipBadge.style.display = 'inline-block';
                 
-                // 解锁按钮（30 和 60 分钟）
+                // 解锁按钮
                 VIP_TIMES.forEach(time => {
                     const btn = document.getElementById(`btn-${time}`);
-                    if (btn) {
-                        btn.classList.remove('locked');
-                        btn.classList.add('vip-active');
-                        btn.innerHTML = `${time}<span data-lang="min">${translations[currentLang].min}</span>`;
-                    }
+                    btn.classList.remove('locked');
+                    btn.classList.add('vip-active');
+                    btn.innerHTML = `${time}<span data-lang="min">${translations[currentLang].min}</span>`;
                 });
             } else {
                 statusEl.classList.remove('vip');
                 statusText.textContent = '免费用户';
                 vipBadge.style.display = 'none';
                 
-                // 锁定按钮（30 和 60 分钟）
+                // 锁定按钮
                 VIP_TIMES.forEach(time => {
                     const btn = document.getElementById(`btn-${time}`);
-                    if (btn) {
-                        btn.classList.add('locked');
-                        btn.classList.remove('vip-active');
-                        btn.innerHTML = `${time}<span data-lang="min">${translations[currentLang].min}</span> 🔒`;
-                    }
+                    btn.classList.add('locked');
+                    btn.classList.remove('vip-active');
+                    btn.innerHTML = `${time}<span data-lang="min">${translations[currentLang].min}</span> 🔒`;
                 });
                 
                 // 如果当前选的是 VIP 时间，重置为免费时间
@@ -869,21 +865,23 @@
         
         // 处理支付（测试模式）
         function processPayment() {
+            // 模拟支付流程
             const btn = event.target;
             btn.textContent = '支付中...';
             btn.disabled = true;
             
             setTimeout(() => {
+                // 模拟支付成功
                 localStorage.setItem('pianoSeaVIP', 'true');
                 localStorage.setItem('pianoSeaVIPTime', new Date().toISOString());
                 isVIP = true;
                 
+                // 记录转化率数据（实际应用中应发送到服务器）
                 const conversionData = {
                     time: new Date().toISOString(),
                     userAgent: navigator.userAgent,
                     language: currentLang,
-                    type: 'vip_purchase',
-                    plan: 'monthly_12'
+                    type: 'vip_purchase'
                 };
                 console.log('VIP Conversion:', conversionData);
                 
@@ -892,6 +890,7 @@
                 
                 alert('🎉 升级成功！您现在可以享受全部功能了！');
                 
+                // 恢复按钮
                 btn.textContent = '立即支付（测试模式）';
                 btn.disabled = false;
             }, 1500);
@@ -1070,6 +1069,7 @@
                 document.body.style.direction = 'ltr';
             }
             
+            // 更新按钮文字
             updateUI();
         }
         
@@ -1092,8 +1092,7 @@
             updateTimerDisplay();
             
             document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
-            const btn = document.getElementById(`btn-${minutes}`);
-            if (btn) btn.classList.add('active');
+            document.getElementById(`btn-${minutes}`).classList.add('active');
         }
         
         function updateTimerDisplay() {
@@ -1158,6 +1157,7 @@
                 document.getElementById('adminName').textContent = username;
                 localStorage.setItem('adminSession', Date.now());
                 
+                // 显示 VIP 统计
                 showVIPStats();
             } else {
                 alert(currentLang === 'zh' ? '用户名或密码错误' : 'Invalid credentials');
