@@ -5,36 +5,649 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>钢琴海 - Piano Sea</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             min-height: 100vh;
             color: #fff;
             overflow-x: hidden;
         }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        header { text-align: center; padding: 30px 0; }
+        h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .subtitle { font-size: 1.1em; opacity: 0.9; margin-bottom: 20px; }
         
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
+        .vip-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #333;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .lang-selector {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        .lang-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .lang-btn.active { background: rgba(255,255,255,0.9); color: #2a5298; }
+        
+        .scene-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .scene-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
             padding: 20px;
-        }
-        
-        header {
             text-align: center;
-            padding: 30px 0;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .scene-card.active {
+            background: rgba(255,255,255,0.9);
+            color: #2a5298;
+            border-color: #fff;
+        }
+        .scene-icon { font-size: 3em; margin-bottom: 10px; }
+        
+        .controls {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .control-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .control-label { min-width: 100px; }
+        input[type="range"] { flex: 1; }
+        
+        .timer-display { font-size: 3em; text-align: center; margin: 20px 0; }
+        .timer-options { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .time-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+        }
+        .time-btn.active { background: rgba(255,255,255,0.9); color: #2a5298; }
+        .time-btn.locked { 
+            background: rgba(0,0,0,0.3); 
+            position: relative;
+            cursor: pointer;
+        }
+        .time-btn.locked::after { content: "🔒"; font-size: 0.7em; margin-left: 5px; }
+        .time-btn.vip-active { background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #333; }
+        
+        .main-btn {
+            width: 100%;
+            padding: 18px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            cursor: pointer;
+            margin-bottom: 15px;
         }
         
-        h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        .feedback-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
         }
+        .feedback-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 25px;
+            background: transparent;
+            color: white;
+            cursor: pointer;
+        }
+        
+        .admin-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 15px;
+        }
+        .input-group { margin-bottom: 15px; }
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.show { display: flex; }
+        .modal-content {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .vip-title { color: #FFD700; text-align: center; margin-bottom: 20px; }
+        
+        .feedback-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 15px;
+        }
+        .feedback-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border-left: 3px solid #667eea;
+        }
+        .hidden { display: none; }
+        
+        .user-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.5);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            z-index: 100;
+        }
+        .user-status.vip {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #333;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="user-status" id="userStatus">
+        <span id="statusText">免费用户</span>
+    </div>
+
+    <!-- VIP弹窗 -->
+    <div class="modal" id="vipModal">
+        <div class="modal-content">
+            <h2 class="vip-title">👑 升级 VIP 会员</h2>
+            <p style="text-align: center; margin-bottom: 20px;">解锁 30/60 分钟超长时长</p>
+            <div style="font-size: 2em; text-align: center; margin: 20px 0; font-weight: bold;">¥12/月</div>
+            <button class="main-btn" onclick="processPayment()" style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #333;">立即支付（测试）</button>
+            <button class="main-btn" onclick="closeModal('vipModal')" style="background: rgba(255,255,255,0.2); margin-top: 10px;">暂不升级</button>
+        </div>
+    </div>
+
+    <!-- 反馈弹窗 -->
+    <div class="modal" id="feedbackModal">
+        <div class="modal-content">
+            <h2 style="text-align: center; margin-bottom: 20px;">💬 意见反馈</h2>
+            <div id="feedbackForm">
+                <div class="input-group">
+                    <input type="text" id="fbName" placeholder="您的称呼（选填）">
+                </div>
+                <div class="input-group">
+                    <input type="text" id="fbContact" placeholder="微信号/手机号（选填）">
+                </div>
+                <div class="input-group">
+                    <textarea id="fbContent" placeholder="请输入您的意见或建议..." rows="4"></textarea>
+                </div>
+                <button class="main-btn" onclick="submitFeedback()">提交反馈</button>
+                <button class="main-btn" onclick="closeModal('feedbackModal')" style="background: rgba(255,255,255,0.2); margin-top: 10px;">取消</button>
+            </div>
+            <div id="feedbackSuccess" class="hidden" style="text-align: center; padding: 20px;">
+                <div style="font-size: 3em; margin-bottom: 10px;">✅</div>
+                <p>感谢您的反馈！</p>
+                <button class="main-btn" onclick="closeModal('feedbackModal')" style="margin-top: 20px;">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>🎹 钢琴海 <span class="vip-badge hidden" id="vipBadge">VIP</span></h1>
+            <p class="subtitle">一键放松，与海共生</p>
+        </header>
+
+        <div class="lang-selector">
+            <button class="lang-btn active" onclick="setLang('zh')">🇨🇳 中文</button>
+            <button class="lang-btn" onclick="setLang('en')">🇬🇧 English</button>
+        </div>
+
+        <div class="scene-grid">
+            <div class="scene-card" onclick="selectScene('sleep', this)">
+                <div class="scene-icon">🌙</div>
+                <div>深度睡眠</div>
+            </div>
+            <div class="scene-card" onclick="selectScene('focus', this)">
+                <div class="scene-icon">🎯</div>
+                <div>专注工作</div>
+            </div>
+            <div class="scene-card" onclick="selectScene('relax', this)">
+                <div class="scene-icon">🧘</div>
+                <div>冥想放松</div>
+            </div>
+            <div class="scene-card" onclick="selectScene('read', this)">
+                <div class="scene-icon">📖</div>
+                <div>阅读时光</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-row">
+                <span class="control-label">🌊 海浪</span>
+                <input type="range" id="volWave" min="0" max="100" value="50">
+            </div>
+            <div class="control-row">
+                <span class="control-label">🎹 钢琴</span>
+                <input type="range" id="volPiano" min="0" max="100" value="70">
+            </div>
+            <div class="control-row">
+                <span class="control-label">🎙️ 语音</span>
+                <input type="range" id="volVoice" min="0" max="100" value="30">
+            </div>
+        </div>
+
+        <div class="timer-display" id="timerDisplay">15:00</div>
+
+        <div class="timer-options">
+            <button class="time-btn active" id="btn15" onclick="selectTime(15)">15分钟</button>
+            <button class="time-btn locked" id="btn30" onclick="selectTime(30)">30分钟 🔒</button>
+            <button class="time-btn locked" id="btn60" onclick="selectTime(60)">60分钟 🔒</button>
+        </div>
+
+        <button class="main-btn" id="playBtn" onclick="togglePlay()">开始放松之旅</button>
+
+        <div class="feedback-section">
+            <button class="feedback-btn" onclick="openModal('feedbackModal')">💬 意见反馈（离线可用）</button>
+            <p style="text-align: center; margin-top: 10px; font-size: 0.85em; opacity: 0.7;">无需网络，管理员后台查看</p>
+        </div>
+
+        <div class="admin-section">
+            <div style="text-align: center; opacity: 0.7; margin-bottom: 15px; font-size: 0.9em;">管理员区域</div>
+            <div id="adminLogin">
+                <div class="input-group">
+                    <input type="text" id="username" placeholder="用户名">
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="密码">
+                </div>
+                <button class="main-btn" onclick="adminLogin()">登录</button>
+            </div>
+            <div id="adminPanel" class="hidden">
+                <p style="text-align: center; margin-bottom: 15px;">欢迎 Laoban <span style="background: rgba(76,175,80,0.3); padding: 4px 12px; border-radius: 12px; font-size: 0.8em;">已登录</span></p>
+                
+                <div style="background: rgba(255,255,255,0.05); border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                    <h3 style="margin-bottom: 10px;">📝 用户反馈</h3>
+                    <div id="feedbackList" class="feedback-list">
+                        <div style="text-align: center; opacity: 0.6; padding: 20px;">暂无反馈</div>
+                    </div>
+                    <button class="main-btn" onclick="exportFeedback()" style="margin-top: 10px; background: rgba(76,175,80,0.3);">📋 导出反馈</button>
+                </div>
+
+                <button class="main-btn" onclick="resetVIP()" style="background: rgba(255,255,255,0.2);">重置VIP（测试）</button>
+                <button class="main-btn" onclick="adminLogout()" style="background: rgba(255,255,255,0.2); margin-top: 10px;">退出登录</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let isRunning = false;
+        let isVIP = false;
+        let currentScene = '';
+        let timeLeft = 15 * 60;
+        let timerInterval = null;
+        let audioCtx = null;
+        let waveNode = null;
+        let pianoInt = null;
+
+        // 初始化
+        window.onload = function() {
+            isVIP = localStorage.getItem('vip') === 'true';
+            updateUI();
+            
+            if (localStorage.getItem('admin') === 'true') {
+                showAdmin();
+            }
+        };
+
+        // 更新UI
+        function updateUI() {
+            document.getElementById('statusText').textContent = isVIP ? 'VIP会员' : '免费用户';
+            document.getElementById('userStatus').className = isVIP ? 'user-status vip' : 'user-status';
+            document.getElementById('vipBadge').className = isVIP ? 'vip-badge' : 'vip-badge hidden';
+            
+            // 更新按钮状态
+            [30, 60].forEach(t => {
+                const btn = document.getElementById('btn' + t);
+                if (isVIP) {
+                    btn.className = 'time-btn vip-active';
+                    btn.innerHTML = t + '分钟';
+                } else {
+                    btn.className = 'time-btn locked';
+                    btn.innerHTML = t + '分钟 🔒';
+                }
+            });
+        }
+
+        // 选择时长
+        function selectTime(min) {
+            if ((min === 30 || min === 60) && !isVIP) {
+                openModal('vipModal');
+                return;
+            }
+            timeLeft = min * 60;
+            updateTimer();
+            
+            // 更新按钮样式
+            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn' + min).classList.add('active');
+        }
+
+        // 更新计时器显示
+        function updateTimer() {
+            const m = Math.floor(timeLeft / 60);
+            const s = timeLeft % 60;
+            document.getElementById('timerDisplay').textContent = 
+                (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+        }
+
+        // 选择场景
+        function selectScene(scene, el) {
+            currentScene = scene;
+            document.querySelectorAll('.scene-card').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        // 音频控制
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playWave() {
+            if (!audioCtx) return;
+            const bufferSize = 2 * audioCtx.sampleRate;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            let lastOut = 0;
+            
+            for (let i = 0; i < bufferSize; i++) {
+                const white = Math.random() * 2 - 1;
+                data[i] = (lastOut + (0.02 * white)) / 1.02;
+                lastOut = data[i];
+                data[i] *= 3.5;
+            }
+            
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = buffer;
+            noise.loop = true;
+            
+            const gain = audioCtx.createGain();
+            gain.gain.value = document.getElementById('volWave').value / 100;
+            
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 400;
+            
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+            noise.start(0);
+            
+            waveNode = { source: noise, gain: gain };
+        }
+
+        function playPiano() {
+            if (!audioCtx) return;
+            const notes = currentScene === 'sleep' ? [261.63, 293.66, 329.63] : 
+                         currentScene === 'focus' ? [440, 554.37, 659.25] :
+                         currentScene === 'read' ? [349.23, 440, 523.25] : [329.63, 392, 493.88];
+            
+            let i = 0;
+            pianoInt = setInterval(() => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = notes[i % notes.length];
+                gain.gain.value = document.getElementById('volPiano').value / 100 * 0.3;
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 2);
+                i++;
+            }, 4000);
+        }
+
+        function stopAudio() {
+            if (waveNode) {
+                try { waveNode.source.stop(); } catch(e) {}
+                waveNode = null;
+            }
+            if (pianoInt) {
+                clearInterval(pianoInt);
+                pianoInt = null;
+            }
+        }
+
+        // 播放控制
+        function togglePlay() {
+            if (!currentScene) {
+                alert('请先选择一个场景');
+                return;
+            }
+            
+            initAudio();
+            
+            if (isRunning) {
+                // 暂停
+                clearInterval(timerInterval);
+                stopAudio();
+                isRunning = false;
+                document.getElementById('playBtn').textContent = '开始放松之旅';
+            } else {
+                // 开始
+                isRunning = true;
+                document.getElementById('playBtn').textContent = '暂停';
+                playWave();
+                playPiano();
+                
+                timerInterval = setInterval(() => {
+                    if (timeLeft > 0) {
+                        timeLeft--;
+                        updateTimer();
+                    } else {
+                        clearInterval(timerInterval);
+                        stopAudio();
+                        isRunning = false;
+                        alert('时间结束！');
+                        document.getElementById('playBtn').textContent = '开始放松之旅';
+                    }
+                }, 1000);
+            }
+        }
+
+        // VIP支付
+        function processPayment() {
+            localStorage.setItem('vip', 'true');
+            localStorage.setItem('vipTime', new Date().toISOString());
+            isVIP = true;
+            updateUI();
+            closeModal('vipModal');
+            alert('🎉 升级成功！');
+        }
+
+        function resetVIP() {
+            localStorage.removeItem('vip');
+            isVIP = false;
+            updateUI();
+            alert('VIP已重置');
+        }
+
+        // 弹窗控制
+        function openModal(id) {
+            document.getElementById(id).classList.add('show');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+
+        // 反馈系统
+        function submitFeedback() {
+            const name = document.getElementById('fbName').value || '匿名';
+            const contact = document.getElementById('fbContact').value || '未填写';
+            const content = document.getElementById('fbContent').value;
+            
+            if (!content) {
+                alert('请输入反馈内容');
+                return;
+            }
+            
+            const feedback = {
+                name: name,
+                contact: contact,
+                content: content,
+                time: new Date().toLocaleString('zh-CN'),
+                id: Date.now()
+            };
+            
+            let list = JSON.parse(localStorage.getItem('feedbacks') || '[]');
+            list.unshift(feedback);
+            localStorage.setItem('feedbacks', JSON.stringify(list));
+            
+            document.getElementById('feedbackForm').classList.add('hidden');
+            document.getElementById('feedbackSuccess').classList.remove('hidden');
+            document.getElementById('fbContent').value = '';
+        }
+
+        function loadFeedbacks() {
+            const list = JSON.parse(localStorage.getItem('feedbacks') || '[]');
+            const container = document.getElementById('feedbackList');
+            
+            if (list.length === 0) {
+                container.innerHTML = '<div style="text-align: center; opacity: 0.6; padding: 20px;">暂无反馈</div>';
+                return;
+            }
+            
+            let html = '';
+            list.forEach(item => {
+                html += `<div class="feedback-item">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8em; opacity: 0.7; margin-bottom: 5px;">
+                        <span>${item.name}</span><span>${item.time}</span>
+                    </div>
+                    <div style="font-size: 0.8em; opacity: 0.8; margin-bottom: 5px;">联系: ${item.contact}</div>
+                    <div>${item.content}</div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function exportFeedback() {
+            const list = JSON.parse(localStorage.getItem('feedbacks') || '[]');
+            if (list.length === 0) {
+                alert('暂无反馈');
+                return;
+            }
+            
+            let text = '钢琴海用户反馈导出\n时间: ' + new Date().toLocaleString() + '\n\n';
+            list.forEach((item, i) => {
+                text += `【${i+1}】${item.time}\n用户: ${item.name}\n联系: ${item.contact}\n内容: ${item.content}\n\n`;
+            });
+            
+            navigator.clipboard.writeText(text).then(() => {
+                alert('已复制 ' + list.length + ' 条反馈到剪贴板');
+            }).catch(() => {
+                console.log(text);
+                alert('导出内容已打印到控制台(F12)');
+            });
+        }
+
+        // 管理员
+        function adminLogin() {
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            if (u === 'Laoban' && p === 'MMpiano260218**') {
+                localStorage.setItem('admin', 'true');
+                showAdmin();
+            } else {
+                alert('密码错误');
+            }
+        }
+
+        function showAdmin() {
+            document.getElementById('adminLogin').classList.add('hidden');
+            document.getElementById('adminPanel').classList.remove('hidden');
+            loadFeedbacks();
+        }
+
+        function adminLogout() {
+            localStorage.removeItem('admin');
+            document.getElementById('adminLogin').classList.remove('hidden');
+            document.getElementById('adminPanel').classList.add('hidden');
+        }
+
+        function setLang(lang) {
+            // 简化语言切换
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // 点击弹窗外部关闭
+        document.querySelectorAll('.modal').forEach(m => {
+            m.addEventListener('click', function(e) {
+                if (e.target === this) this.classList.remove('show');
+            });
+        });
+    </script>
+</body>
+</html>        }
         
         .subtitle {
             font-size: 1.1em;
@@ -497,4 +1110,5 @@
         }
         
         /* 反馈列表样式 */
+
         .feedback-list
