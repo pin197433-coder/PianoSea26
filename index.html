@@ -126,6 +126,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            min-width: 100px;
         }
         
         .slider-container {
@@ -209,7 +210,6 @@
             transform: none;
         }
         
-        /* 新增：意见反馈按钮样式 */
         .feedback-section {
             margin-top: 30px;
             padding: 20px;
@@ -301,6 +301,19 @@
             display: none;
         }
         
+        .audio-status {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
+        
+        .playing {
+            background: rgba(76, 175, 80, 0.3);
+        }
+        
         .wave-animation {
             position: fixed;
             bottom: 0;
@@ -350,23 +363,27 @@
             </div>
         </div>
         
+        <div class="audio-status" id="audioStatus">
+            <span data-lang="ready">准备就绪 - 点击开始播放</span>
+        </div>
+        
         <div class="player-controls">
             <div class="control-row">
                 <span class="control-label">🌊 <span data-lang="wave">海浪音量</span></span>
                 <div class="slider-container">
-                    <input type="range" id="waveVolume" min="0" max="100" value="50">
+                    <input type="range" id="waveVolume" min="0" max="100" value="50" oninput="updateVolume('wave', this.value)">
                 </div>
             </div>
             <div class="control-row">
                 <span class="control-label">🎹 <span data-lang="piano">钢琴音量</span></span>
                 <div class="slider-container">
-                    <input type="range" id="pianoVolume" min="0" max="100" value="70">
+                    <input type="range" id="pianoVolume" min="0" max="100" value="70" oninput="updateVolume('piano', this.value)">
                 </div>
             </div>
             <div class="control-row">
                 <span class="control-label">🎙️ <span data-lang="voice">语音引导</span></span>
                 <div class="slider-container">
-                    <input type="range" id="voiceVolume" min="0" max="100" value="30">
+                    <input type="range" id="voiceVolume" min="0" max="100" value="30" oninput="updateVolume('voice', this.value)">
                 </div>
             </div>
         </div>
@@ -384,7 +401,6 @@
             <span data-lang="start">开始放松之旅</span>
         </button>
         
-        <!-- 新增：意见反馈区域 -->
         <div class="feedback-section">
             <a href="https://forms.gle/r6znYF8Pr5ffVmAv9" target="_blank" class="feedback-btn">
                 <span>💬</span>
@@ -452,6 +468,8 @@
                 min: "分钟",
                 start: "开始放松之旅",
                 pause: "暂停",
+                ready: "准备就绪 - 点击开始播放",
+                playing: "正在播放...",
                 feedback: "意见反馈",
                 feedbackDesc: "您的建议帮助我们做得更好",
                 admin: "安全数据管理区域",
@@ -478,6 +496,8 @@
                 min: "分鐘",
                 start: "開始放鬆之旅",
                 pause: "暫停",
+                ready: "準備就緒 - 點擊開始播放",
+                playing: "正在播放...",
                 feedback: "意見反饋",
                 feedbackDesc: "您的建議幫助我們做得更好",
                 admin: "安全數據管理區域",
@@ -504,6 +524,8 @@
                 min: "min",
                 start: "Start Journey",
                 pause: "Pause",
+                ready: "Ready - Click to start",
+                playing: "Playing...",
                 feedback: "Feedback",
                 feedbackDesc: "Your suggestions help us improve",
                 admin: "Secure Data Management",
@@ -530,6 +552,8 @@
                 min: "min",
                 start: "Comenzar Viaje",
                 pause: "Pausa",
+                ready: "Listo - Haga clic para iniciar",
+                playing: "Reproduciendo...",
                 feedback: "Comentarios",
                 feedbackDesc: "Sus sugerencias nos ayudan a mejorar",
                 admin: "Gestión Segura de Datos",
@@ -556,6 +580,8 @@
                 min: "دقيقة",
                 start: "ابدأ الرحلة",
                 pause: "إيقاف مؤقت",
+                ready: "جاهز - انقر للبدء",
+                playing: "جاري التشغيل...",
                 feedback: "تعليقات",
                 feedbackDesc: "اقتراحاتك تساعدنا على التحسن",
                 admin: "إدارة البيانات الآمنة",
@@ -577,6 +603,156 @@
         let timeLeft = 25 * 60;
         let isRunning = false;
         let currentScene = '';
+        let audioContext = null;
+        let waveNode = null;
+        let pianoInterval = null;
+        let voiceTimeout = null;
+        
+        // 初始化音频上下文（必须用户交互后才能创建）
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }
+        
+        // 生成海浪声（使用噪声缓冲区）
+        function createWaveSound() {
+            if (!audioContext) return;
+            
+            const bufferSize = 2 * audioContext.sampleRate;
+            const noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            
+            for (let i = 0; i < bufferSize; i++) {
+                // 粉红噪声算法，更接近海浪声
+                const white = Math.random() * 2 - 1;
+                output[i] = (lastOut + (0.02 * white)) / 1.02;
+                lastOut = output[i];
+                output[i] *= 3.5;
+            }
+            
+            const noise = audioContext.createBufferSource();
+            noise.buffer = noiseBuffer;
+            noise.loop = true;
+            
+            const gainNode = audioContext.createGain();
+            gainNode.gain.value = document.getElementById('waveVolume').value / 100;
+            
+            // 添加滤波器让声音更低沉（更像海浪）
+            const filter = audioContext.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 400;
+            
+            noise.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            noise.start(0);
+            waveNode = { source: noise, gain: gainNode };
+        }
+        
+        let lastOut = 0;
+        
+        // 生成钢琴声（使用振荡器模拟）
+        function playPianoNote(frequency, duration, delay) {
+            if (!audioContext) return;
+            
+            setTimeout(() => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+                
+                // 钢琴包络
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(
+                    document.getElementById('pianoVolume').value / 100 * 0.3, 
+                    audioContext.currentTime + 0.02
+                );
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration);
+            }, delay);
+        }
+        
+        // 播放钢琴旋律
+        function startPianoMusic() {
+            if (!audioContext) return;
+            
+            const melodies = {
+                sleep: [261.63, 293.66, 329.63, 349.23], // C大调和弦
+                focus: [440, 554.37, 659.25, 440], // A大调
+                relax: [329.63, 392, 493.88, 392], // E大调
+                read: [349.23, 440, 523.25, 440]  // F大调
+            };
+            
+            const notes = melodies[currentScene] || melodies.relax;
+            let noteIndex = 0;
+            
+            pianoInterval = setInterval(() => {
+                playPianoNote(notes[noteIndex % notes.length], 2, 0);
+                playPianoNote(notes[(noteIndex + 2) % notes.length], 1.5, 500);
+                noteIndex++;
+            }, 4000); // 每4秒播放一次和弦
+        }
+        
+        // 语音引导（使用简单的提示音代替，避免语音识别API的复杂性）
+        function playVoicePrompt() {
+            if (!audioContext) return;
+            
+            const voiceGain = document.getElementById('voiceVolume').value / 100;
+            if (voiceGain <= 0) return;
+            
+            // 播放柔和的提示音作为开始引导
+            setTimeout(() => {
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(432, audioContext.currentTime); // 宇宙音
+                gain.gain.setValueAtTime(0, audioContext.currentTime);
+                gain.gain.linearRampToValueAtTime(voiceGain * 0.2, audioContext.currentTime + 1);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 4);
+                
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+                osc.start(audioContext.currentTime);
+                osc.stop(audioContext.currentTime + 4);
+            }, 1000);
+        }
+        
+        function stopAllSounds() {
+            if (waveNode) {
+                try {
+                    waveNode.source.stop();
+                    waveNode.source.disconnect();
+                } catch(e) {}
+                waveNode = null;
+            }
+            
+            if (pianoInterval) {
+                clearInterval(pianoInterval);
+                pianoInterval = null;
+            }
+            
+            if (voiceTimeout) {
+                clearTimeout(voiceTimeout);
+                voiceTimeout = null;
+            }
+        }
+        
+        function updateVolume(type, value) {
+            if (type === 'wave' && waveNode) {
+                waveNode.gain.gain.setValueAtTime(value / 100, audioContext.currentTime);
+            }
+        }
         
         function changeLang(lang) {
             currentLang = lang;
@@ -594,7 +770,6 @@
                 if (t[key]) el.placeholder = t[key];
             });
             
-            // RTL for Arabic
             if (lang === 'ar') {
                 document.body.style.direction = 'rtl';
             } else {
@@ -606,6 +781,14 @@
             currentScene = scene;
             document.querySelectorAll('.scene-card').forEach(card => card.classList.remove('active'));
             element.classList.add('active');
+            
+            // 如果正在播放，切换场景音乐
+            if (isRunning) {
+                if (pianoInterval) {
+                    clearInterval(pianoInterval);
+                    startPianoMusic();
+                }
+            }
         }
         
         function setTimer(minutes) {
@@ -625,23 +808,50 @@
         }
         
         function toggleTimer() {
+            initAudio(); // 确保音频上下文已初始化
+            
             const btn = document.getElementById('startBtn');
+            const statusEl = document.getElementById('audioStatus');
+            
             if (isRunning) {
+                // 暂停
                 clearInterval(timerInterval);
+                stopAllSounds();
                 isRunning = false;
                 btn.innerHTML = `<span data-lang="start">${translations[currentLang].start}</span>`;
+                statusEl.textContent = translations[currentLang].ready;
+                statusEl.classList.remove('playing');
             } else {
+                // 开始
+                if (!currentScene) {
+                    alert(currentLang === 'zh' ? '请先选择一个场景' : 'Please select a scene first');
+                    return;
+                }
+                
                 isRunning = true;
                 btn.innerHTML = `<span data-lang="pause">${translations[currentLang].pause}</span>`;
+                statusEl.textContent = translations[currentLang].playing;
+                statusEl.classList.add('playing');
+                
+                // 播放声音
+                createWaveSound();
+                startPianoMusic();
+                playVoicePrompt();
+                
+                // 倒计时
                 timerInterval = setInterval(() => {
                     if (timeLeft > 0) {
                         timeLeft--;
                         updateTimerDisplay();
                     } else {
+                        // 结束
                         clearInterval(timerInterval);
+                        stopAllSounds();
                         isRunning = false;
                         alert(currentLang === 'zh' ? '放松时间结束！' : 'Time is up!');
                         btn.innerHTML = `<span data-lang="start">${translations[currentLang].start}</span>`;
+                        statusEl.textContent = translations[currentLang].ready;
+                        statusEl.classList.remove('playing');
                     }
                 }, 1000);
             }
@@ -651,7 +861,6 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             
-            // 简单的管理员验证（实际应用中应该使用安全的后端验证）
             if (username === 'Laoban' && password === 'MMpiano260218**') {
                 document.getElementById('adminLogin').classList.add('hidden');
                 document.getElementById('adminPanel').classList.remove('hidden');
@@ -671,11 +880,9 @@
         }
         
         function viewData() {
-            // 打开 Google Sheets 查看反馈数据
             window.open('https://sheets.google.com', '_blank');
         }
         
-        // 检查会话
         window.onload = function() {
             const session = localStorage.getItem('adminSession');
             if (session && (Date.now() - session) < 24 * 60 * 60 * 1000) {
@@ -684,17 +891,6 @@
                 document.getElementById('adminName').textContent = 'Laoban';
             }
         };
-        
-        // 音量控制（模拟）
-        document.getElementById('waveVolume').addEventListener('input', function() {
-            console.log('Wave volume:', this.value);
-        });
-        document.getElementById('pianoVolume').addEventListener('input', function() {
-            console.log('Piano volume:', this.value);
-        });
-        document.getElementById('voiceVolume').addEventListener('input', function() {
-            console.log('Voice volume:', this.value);
-        });
     </script>
 </body>
 </html>
