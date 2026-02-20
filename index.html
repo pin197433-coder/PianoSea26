@@ -688,7 +688,7 @@
                 audioPlayers.voice.loop = false;
                 audioPlayers.piano.volume = 0.6;
                 audioPlayers.wave.volume = 0.5;
-                audioPlayers.voice.volume = 0.8;
+                audioPlayers.voice.volume = 0.9; // 语音音量稍高
 
                 audioPlayers.piano.playsinline = true;
                 audioPlayers.wave.playsinline = true;
@@ -720,7 +720,7 @@
                 setTimeout(() => {
                     showDebug('尝试切换备用钢琴曲...');
                     switchToNextPiano();
-                }, 1000);
+                }, 300);
             };
 
             audioPlayers.wave.oncanplaythrough = function() {
@@ -894,7 +894,7 @@
                 audioPlayers.piano.src = pianoFile;
                 audioPlayers.piano.onerror = function() {
                     showDebug('主钢琴曲失败，尝试备用...');
-                    setTimeout(() => switchToNextPiano(), 500);
+                    setTimeout(() => switchToNextPiano(), 100);
                 };
 
                 audioPlayers.piano.load();
@@ -926,7 +926,7 @@
                     } catch (e) {
                         showDebug('播放错误: ' + e.message);
                     }
-                }, 500);
+                }, 200);
 
                 updateTrackInfo();
 
@@ -966,7 +966,7 @@
                     showDebug('备用钢琴曲也失败: ' + e.message);
                     // 如果还是失败，再试下一首（最多3次）
                     if (current.currentPianoIndex !== 0) {
-                        setTimeout(() => switchToNextPiano(), 500);
+                        setTimeout(() => switchToNextPiano(), 100);
                     }
                 });
             }
@@ -1092,7 +1092,7 @@
                     stopAll();
                     alert(translations[current.lang].startBtn + ' - Complete!');
                 }
-            }, 1000);
+            }, 300);
         }
 
         function updateTimerDisplay() {
@@ -1138,18 +1138,8 @@
                 if (e.target === this) closePremium();
             });
 
-            // 预加载音频（延迟1秒执行，避免影响页面渲染）
-            setTimeout(preloadAudio, 1000);
-
-            showDebug('页面加载完成');
-        };
-
-        window.onbeforeunload = () => {
-            clearInterval(current.timerInterval);
-            Object.values(audioPlayers).forEach(audio => {
-                if (audio) {
-                    audio.pause();
-                    audio.src = '';
+/* 预加载已禁用
+*/
                 }
             });
         };
