@@ -330,7 +330,7 @@
         </div>
     </div>
 
-    <a href="#" onclick="openFeedback(event)" id="feedback-btn" title="Send Feedback / 意见反馈">💬</a>
+    <a href="javascript:;" onclick="return openFeedback(event);" id="feedback-btn" title="客户反馈 / Feedback" style="cursor:pointer;text-decoration:none;">💬</a>
 
     <!-- VIP弹窗 -->
     <div class="premium-modal" id="premiumModal">
@@ -976,62 +976,28 @@
 
         
         // 智能邮件反馈（最简单方案）
+        // 智能问卷反馈（腾讯问卷四语言版）
+        // 智能双渠道反馈（中文/粤语用腾讯，外语用Google）
         function openFeedback(e) {
-            e.preventDefault();
+            if(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
 
+            // 判断语言
             const isChinese = (current.lang === 'zh' || current.lang === 'hk');
-            const email = 'pin197433@gmail.com';
-            let subject, body;
 
             if (isChinese) {
-                // 中文/粤语用户
-                subject = '钢琴海APP用户反馈';
-                body = '您好，感谢您使用钢琴海APP！%0D%0A%0D%0A' +
-                       '【您的反馈类型】：Bug报错 / 功能建议 / 使用体验 / 其他%0D%0A%0D%0A' +
-                       '【具体反馈内容】：%0D%0A%0D%0A' +
-                       '【使用场景】：焦虑急救 / 静心专注 / 睡前助眠 / 午休小憩%0D%0A%0D%0A' +
-                       '【联系方式】选填（如需回访请留邮箱/微信）：%0D%0A';
+                // 中文/粤语用户 → 腾讯问卷（国内可访问）
+                const formChinese = 'https://wj.qq.com/s2/25778177/fb7d/';
+                window.open(formChinese, '_blank', 'noopener,noreferrer');
             } else {
-                // 外语用户（英语/西班牙语/阿拉伯语）
-                subject = 'Piano Sea APP Feedback';
-                body = 'Hello, thank you for using Piano Sea!%0D%0A%0D%0A' +
-                       '[Feedback Type]: Bug Report / Feature Request / User Experience / Other%0D%0A%0D%0A' +
-                       '[Your Feedback]:%0D%0A%0D%0A' +
-                       '[Scene Used]: Anxiety Relief / Focus / Deep Sleep / Power Nap%0D%0A%0D%0A' +
-                       '[Contact] Optional (email if you need reply):%0D%0A';
+                // 英语/西班牙语/阿拉伯语 → Google Forms（国际通用）
+                const formGoogle = 'https://forms.gle/r6znYF8Pr5ffVmAv9';
+                window.open(formGoogle, '_blank', 'noopener,noreferrer');
             }
 
-            // 生成mailto链接并打开
-            const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${body}`;
-            window.location.href = mailtoLink;
-        }
-
-        // 预加载音频（减少切换延迟）
-        function preloadAudio() {
-            // 静默预加载所有钢琴曲的前几秒
-            Object.keys(audioConfig.piano).forEach(scene => {
-                audioConfig.piano[scene].forEach((file, index) => {
-                    const audio = new Audio();
-                    audio.src = decodeURIComponent(file);
-                    audio.preload = 'metadata'; // 只预加载元数据，不占用太多流量
-                });
-            });
-            console.log('音频元数据预加载完成');
-        }
-
-        // 页面加载完成后预加载// 强制重新加载当前场景的钢琴曲（用于修复卡住的音频）
-
-        function togglePlay() {
-            if (!current.isPlaying) {
-                startPlaying();
-                return;
-            }
-
-            if (current.isPaused) {
-                resumeAll();
-            } else {
-                pauseAll();
-            }
+            return false;
         }
 
         function resumeAll() {
