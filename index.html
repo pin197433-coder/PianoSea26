@@ -341,21 +341,21 @@
             <div class="price-cards">
                 <div class="price-card" onclick="selectPlan('month')">
                     <div style="font-size: 0.8em; opacity: 0.8;" data-i18n="monthly">月度会员</div>
-                    <div><span class="price-amount">¥18</span><span style="font-size: 0.9em;">/<span data-i18n="perMonth">月</span></span></div>
-                    <div style="font-size: 0.75em; margin-top: 5px;" data-i18n="monthlyDesc">适合短期体验</div>
+                    <div><span class="price-amount" id="priceMonth">¥18</span><span style="font-size: 0.9em;">/<span data-i18n="perMonth">月</span></span></div>
+                    <div style="font-size: 0.75em; margin-top: 5px;" id="descMonth" data-i18n="monthlyDesc">适合短期体验</div>
                 </div>
 
                 <div class="price-card recommended" onclick="selectPlan('year')">
                     <span class="price-tag" data-i18n="recommended">推荐</span>
                     <div style="font-size: 0.8em; opacity: 0.8;" data-i18n="yearly">年度会员</div>
-                    <div><span class="price-amount">¥238</span><span style="font-size: 0.9em;">/<span data-i18n="perYear">年</span></span></div>
-                    <div style="font-size: 0.75em; margin-top: 5px;" data-i18n="yearlyDesc">立省178元</div>
+                    <div><span class="price-amount" id="priceYear">¥238</span><span style="font-size: 0.9em;">/<span data-i18n="perYear">年</span></span></div>
+                    <div style="font-size: 0.75em; margin-top: 5px;" id="descYear" data-i18n="yearlyDesc">立省178元</div>
                 </div>
 
                 <div class="price-card permanent" onclick="selectPlan('permanent')">
                     <span class="price-tag" data-i18n="bestValue">超值</span>
                     <div style="font-size: 0.8em; opacity: 0.8;" data-i18n="permanent">永久会员</div>
-                    <div><span class="price-amount">¥498</span></div>
+                    <div><span class="price-amount" id="pricePermanent">¥498</span></div>
                     <div style="font-size: 0.75em; margin-top: 5px;" data-i18n="permanentDesc">一次付费终身享用</div>
                 </div>
             </div>
@@ -373,7 +373,7 @@
     </div>
 
     <script>
-        // 多语言配置
+        // 多语言配置 - 包含价格设置
         const translations = {
             zh: {
                 appName: "钢琴海", subtitle: "一键放松，与海共生",
@@ -405,7 +405,12 @@
                 continueFree: "👋 继续免费体验",
                 feedback: "意见反馈",
                 loading: "加载中...",
-                errorLoad: "加载失败"
+                errorLoad: "加载失败",
+                // 人民币价格
+                priceMonth: "¥18",
+                priceYear: "¥238", 
+                pricePermanent: "¥498",
+                saveAmount: "立省178元"
             },
             hk: {
                 appName: "鋼琴海", subtitle: "一鍵放鬆，與海共生",
@@ -437,7 +442,12 @@
                 continueFree: "👋 繼續免費體驗",
                 feedback: "意見反饋",
                 loading: "加載中...",
-                errorLoad: "加載失敗"
+                errorLoad: "加載失敗",
+                // 人民币价格
+                priceMonth: "¥18",
+                priceYear: "¥238",
+                pricePermanent: "¥498",
+                saveAmount: "立省178元"
             },
             en: {
                 appName: "Piano Sea", subtitle: "Relax with one click",
@@ -458,7 +468,7 @@
                 volPiano: "🎹 Piano", volWave: "🌊 Waves", volVoice: "🎙️ Voice",
                 upgradeVIP: "🔓 Upgrade to VIP", vipSubtitle: "Unlock full relaxation experience",
                 monthly: "Monthly", perMonth: "mo", monthlyDesc: "Good for short-term",
-                yearly: "Yearly", perYear: "yr", yearlyDesc: "Save ¥178",
+                yearly: "Yearly", perYear: "yr", yearlyDesc: "Save $12",
                 permanent: "Lifetime", permanentDesc: "Pay once, enjoy forever",
                 recommended: "REC", bestValue: "BEST",
                 vipFeature1: "✓ 30/60 min deep relaxation",
@@ -469,7 +479,12 @@
                 continueFree: "👋 Continue Free Experience",
                 feedback: "Feedback",
                 loading: "Loading...",
-                errorLoad: "Load Failed"
+                errorLoad: "Load Failed",
+                // 美元价格
+                priceMonth: "$5",
+                priceYear: "$48",
+                pricePermanent: "$150",
+                saveAmount: "Save $12"
             },
             es: {
                 appName: "Piano Mar", subtitle: "Relájate con un clic",
@@ -490,7 +505,7 @@
                 volPiano: "🎹 Piano", volWave: "🌊 Olas", volVoice: "🎙️ Voz",
                 upgradeVIP: "🔓 Actualizar a VIP", vipSubtitle: "Desbloquea experiencia completa",
                 monthly: "Mensual", perMonth: "mes", monthlyDesc: "Corto plazo",
-                yearly: "Anual", perYear: "año", yearlyDesc: "Ahorra ¥178",
+                yearly: "Anual", perYear: "año", yearlyDesc: "Ahorra $12",
                 permanent: "Permanente", permanentDesc: "Paga una vez, disfruta siempre",
                 recommended: "TOP", bestValue: "MEJOR",
                 vipFeature1: "✓ Relajación 30/60 min",
@@ -501,7 +516,12 @@
                 continueFree: "👋 Continuar Gratis",
                 feedback: "Comentarios",
                 loading: "Cargando...",
-                errorLoad: "Error al cargar"
+                errorLoad: "Error al cargar",
+                // 美元价格
+                priceMonth: "$5",
+                priceYear: "$48",
+                pricePermanent: "$150",
+                saveAmount: "Ahorra $12"
             },
             ar: {
                 appName: "بيانو سي", subtitle: "استرخاء بنقرة واحدة",
@@ -522,7 +542,7 @@
                 volPiano: "🎹 بيانو", volWave: "🌊 أمواج", volVoice: "🎙️ صوت",
                 upgradeVIP: "🔓 ترقية إلى VIP", vipSubtitle: "افتح تجربة الاسترخاء الكاملة",
                 monthly: "شهري", perMonth: "شهر", monthlyDesc: "قصير المدى",
-                yearly: "سنوي", perYear: "سنة", yearlyDesc: "وفر ¥178",
+                yearly: "سنوي", perYear: "سنة", yearlyDesc: "وفر $12",
                 permanent: "دائم", permanentDesc: "ادفع مرة واحدة، استمتع للأبد",
                 recommended: "موصى به", bestValue: "الأفضل",
                 vipFeature1: "✓ استرخاء 30/60 د",
@@ -533,11 +553,16 @@
                 continueFree: "👋 متابعة مجاناً",
                 feedback: "تعليقات",
                 loading: "جار التحميل...",
-                errorLoad: "فشل التحميل"
+                errorLoad: "فشل التحميل",
+                // 美元价格
+                priceMonth: "$5",
+                priceYear: "$48",
+                pricePermanent: "$150",
+                saveAmount: "وفر $12"
             }
         };
 
-        // 音频文件映射配置 - 使用encodeURIComponent处理空格
+        // 音频文件映射配置
         const audioConfig = {
             oceans: {
                 mediterranean: encodeURIComponent('audio/wave1.mp3'),
@@ -598,7 +623,6 @@
             }
         };
 
-        // 场景显示配置
         const scenes = {
             anxiety: { key: 'scene1', duration: 'scene1Duration', name: '焦虑急救' },
             focus: { key: 'scene2', duration: 'scene2Duration', name: '静心专注' },
@@ -612,7 +636,6 @@
             pacific: 'ocean3'
         };
 
-        // 全局状态
         let current = { 
             lang: 'zh', 
             scene: 'anxiety', 
@@ -626,14 +649,12 @@
             audioLoaded: { piano: false, wave: false, voice: false }
         };
 
-        // 音频对象
         let audioPlayers = {
             piano: null,
             wave: null,
             voice: null
         };
 
-        // 调试信息显示
         function showDebug(msg) {
             const debugEl = document.getElementById('debugInfo');
             if (debugEl) {
@@ -643,10 +664,8 @@
             console.log('[PianoSea]', msg);
         }
 
-        // 初始化音频设置
         function initAudio() {
             try {
-                // 如果已经初始化，先销毁旧的
                 if (audioPlayers.piano) {
                     audioPlayers.piano.pause();
                     audioPlayers.piano.src = '';
@@ -660,12 +679,10 @@
                     audioPlayers.voice.src = '';
                 }
 
-                // 创建新的音频对象
                 audioPlayers.piano = new Audio();
                 audioPlayers.wave = new Audio();
                 audioPlayers.voice = new Audio();
 
-                // 设置属性
                 audioPlayers.piano.loop = true;
                 audioPlayers.wave.loop = true;
                 audioPlayers.voice.loop = false;
@@ -673,7 +690,6 @@
                 audioPlayers.wave.volume = 0.5;
                 audioPlayers.voice.volume = 0.8;
 
-                // iOS兼容性设置
                 audioPlayers.piano.playsinline = true;
                 audioPlayers.wave.playsinline = true;
                 audioPlayers.voice.playsinline = true;
@@ -681,7 +697,6 @@
                 audioPlayers.wave.setAttribute('playsinline', '');
                 audioPlayers.voice.setAttribute('playsinline', '');
 
-                // 加载状态监听
                 setupAudioListeners();
 
                 current.audioLoaded = { piano: false, wave: false, voice: false };
@@ -693,9 +708,7 @@
             }
         }
 
-        // 设置音频事件监听
         function setupAudioListeners() {
-            // 钢琴
             audioPlayers.piano.oncanplaythrough = function() {
                 current.audioLoaded.piano = true;
                 showDebug('✓ 钢琴曲加载完成');
@@ -705,7 +718,6 @@
                 console.error('钢琴错误:', e);
             };
 
-            // 海浪
             audioPlayers.wave.oncanplaythrough = function() {
                 current.audioLoaded.wave = true;
                 showDebug('✓ 海浪声加载完成');
@@ -714,7 +726,6 @@
                 showDebug('✗ 海浪声加载失败: ' + audioPlayers.wave.src);
             };
 
-            // 语音
             audioPlayers.voice.oncanplaythrough = function() {
                 current.audioLoaded.voice = true;
                 showDebug('✓ 语音加载完成');
@@ -723,13 +734,11 @@
                 showDebug('✗ 语音加载失败: ' + audioPlayers.voice.src);
             };
 
-            // 语音结束事件
             audioPlayers.voice.onended = function() {
                 showDebug('语音播放完成');
             };
         }
 
-        // 切换语言
         function changeLang(lang) {
             current.lang = lang;
 
@@ -737,10 +746,15 @@
             event.target.closest('.lang-btn').classList.add('active');
 
             const t = translations[lang];
+
+            // 更新所有带 data-i18n 的元素
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if (t[key]) el.textContent = t[key];
             });
+
+            // 更新价格显示
+            updatePrices(lang);
 
             updateSceneText();
             updateStatus();
@@ -750,6 +764,23 @@
             if (current.isPlaying) {
                 loadAndPlayAudio();
             }
+        }
+
+        // 更新价格显示函数
+        function updatePrices(lang) {
+            const t = translations[lang];
+
+            // 更新月度价格
+            document.getElementById('priceMonth').textContent = t.priceMonth;
+
+            // 更新年度价格
+            document.getElementById('priceYear').textContent = t.priceYear;
+
+            // 更新永久价格
+            document.getElementById('pricePermanent').textContent = t.pricePermanent;
+
+            // 更新年度节省描述
+            document.getElementById('descYear').textContent = t.saveAmount;
         }
 
         function updateSceneText() {
@@ -848,29 +879,24 @@
             const t = translations[current.lang];
 
             try {
-                // 解码URI获取实际路径
                 const pianoFile = decodeURIComponent(audioConfig.piano[current.scene][current.currentPianoIndex]);
                 const waveFile = decodeURIComponent(audioConfig.oceans[current.ocean]);
                 const voiceFile = decodeURIComponent(audioConfig.voices[current.scene][current.lang]);
 
                 showDebug(`加载: ${current.scene}场景`);
 
-                // 设置源
                 audioPlayers.piano.src = pianoFile;
                 audioPlayers.wave.src = waveFile;
                 audioPlayers.voice.src = voiceFile;
 
-                // 预加载
                 audioPlayers.piano.load();
                 audioPlayers.wave.load();
                 audioPlayers.voice.load();
 
-                // 延迟播放确保加载（iOS兼容性）
                 setTimeout(async () => {
                     try {
                         showDebug('尝试播放...');
 
-                        // 同时播放三个音轨
                         const playPromises = [
                             audioPlayers.piano.play().catch(e => {
                                 showDebug('钢琴播放失败: ' + e.message);
@@ -1064,6 +1090,7 @@
             initAudio();
             updateStatus();
             updateTimerDisplay();
+            updatePrices('zh'); // 默认中文价格
 
             document.getElementById('premiumModal').addEventListener('click', function(e) {
                 if (e.target === this) closePremium();
