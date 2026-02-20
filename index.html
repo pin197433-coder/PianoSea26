@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title id="pageTitle">钢琴海 - Piano Sea</title>
+    <title>钢琴海 - Piano Sea</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -12,66 +12,43 @@
             min-height: 100vh;
             color: white;
             overflow-x: hidden;
-            touch-action: manipulation;
         }
         .container { max-width: 100%; padding: 20px; padding-bottom: 200px; }
         header { text-align: center; padding: 30px 0 15px; }
-        h1 {
-            font-size: 2.2em; margin-bottom: 5px;
-            background: linear-gradient(to right, #fff, #e0e0e0);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
+        h1 { font-size: 2.2em; margin-bottom: 5px; }
         .subtitle { font-size: 1em; opacity: 0.9; }
 
-        .ocean-selector {
+        .ocean-selector, .timer-selector, .guide-section {
             background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);
             border-radius: 20px; padding: 20px; margin: 15px 0;
             border: 2px solid rgba(255,255,255,0.3);
         }
         .selector-title { font-size: 1em; margin-bottom: 15px; font-weight: 600; }
+
         .wave-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .wave-btn {
             background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3);
             color: white; padding: 15px 5px; border-radius: 15px; cursor: pointer;
             transition: all 0.3s; text-align: center;
-            -webkit-tap-highlight-color: transparent;
         }
         .wave-btn.active { 
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-color: white; transform: scale(1.05);
         }
-        .wave-icon { font-size: 2em; display: block; margin-bottom: 8px; }
-        .wave-name { font-size: 0.9em; font-weight: 600; }
-        .wave-desc { font-size: 0.7em; opacity: 0.9; margin-top: 4px; }
 
-        .timer-selector {
-            background: rgba(0,0,0,0.2); border-radius: 20px; padding: 20px; margin: 15px 0;
-        }
-        .timer-title { font-size: 1em; margin-bottom: 15px; }
         .timer-options { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
         .time-btn {
             background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3);
             color: white; padding: 12px 20px; border-radius: 25px; cursor: pointer;
-            font-size: 0.9em; position: relative; min-width: 80px;
+            font-size: 0.9em; min-width: 80px;
         }
         .time-btn.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .free-badge {
-            position: absolute; top: -8px; right: -5px; background: #4ade80;
-            color: #000; font-size: 0.6em; padding: 2px 6px; border-radius: 10px;
-        }
-        .premium-badge {
-            position: absolute; top: -8px; right: -5px; background: #fbbf24;
-            color: #000; font-size: 0.6em; padding: 2px 6px; border-radius: 10px;
-        }
-        .time-btn.locked { opacity: 0.6; }
 
-        .lang-switcher {
-            display: flex; justify-content: center; gap: 8px; margin: 15px 0; flex-wrap: wrap;
-        }
+        .lang-switcher { display: flex; justify-content: center; gap: 8px; margin: 15px 0; flex-wrap: wrap; }
         .lang-btn {
             background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3);
             color: white; padding: 8px 15px; border-radius: 20px; cursor: pointer;
-            font-size: 0.85em; transition: all 0.3s;
+            font-size: 0.85em;
         }
         .lang-btn.active { background: rgba(102, 126, 234, 0.6); border-color: white; }
 
@@ -79,36 +56,24 @@
         .scene-card {
             background: rgba(255,255,255,0.1); border-radius: 15px;
             padding: 20px 10px; border: 2px solid rgba(255,255,255,0.2);
-            cursor: pointer; transition: all 0.3s; text-align: center;
-            -webkit-tap-highlight-color: transparent;
+            cursor: pointer; text-align: center;
         }
-        .scene-card.active { 
-            background: rgba(102, 126, 234, 0.5); border-color: white;
-            transform: scale(1.02);
-        }
-        .scene-icon { font-size: 2.5em; margin-bottom: 8px; }
-        .scene-title { font-size: 1.1em; font-weight: 600; margin-bottom: 5px; }
-        .scene-duration { font-size: 0.75em; opacity: 0.8; }
+        .scene-card.active { background: rgba(102, 126, 234, 0.5); border-color: white; }
 
-        .guide-section {
-            background: rgba(0,0,0,0.2); border-radius: 20px;
-            padding: 20px; margin: 15px 0; text-align: center;
-        }
         .status-box {
             background: rgba(255,255,255,0.1); border-radius: 12px;
-            padding: 15px; margin-bottom: 15px; font-size: 0.95em;
-            border-left: 4px solid #667eea; text-align: left;
+            padding: 15px; margin-bottom: 15px; text-align: center;
         }
+
         .play-btn-main {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none; color: white; padding: 15px 50px;
             border-radius: 30px; cursor: pointer; font-size: 1.2em;
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
-            font-weight: 600; touch-action: manipulation;
+            font-weight: 600; width: 100%;
         }
 
         .player-controls {
-            background: rgba(0,0,0,0.5); backdrop-filter: blur(20px);
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(20px);
             position: fixed; bottom: 0; left: 0; right: 0;
             padding: 20px; border-top: 1px solid rgba(255,255,255,0.2);
             z-index: 1000;
@@ -122,747 +87,543 @@
             width: 50px; height: 50px; border-radius: 50%;
             background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3);
             color: white; cursor: pointer; font-size: 1.2em;
-            touch-action: manipulation;
         }
         .btn-play-big {
             width: 70px; height: 70px; border-radius: 50%;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none; color: white; font-size: 1.8em; cursor: pointer;
-            touch-action: manipulation;
         }
+
         .volume-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
         .vol-item { text-align: center; }
-        .vol-label { font-size: 0.85em; margin-bottom: 5px; }
-        input[type="range"] {
-            width: 100%; height: 6px; border-radius: 3px;
-            background: rgba(255,255,255,0.2); -webkit-appearance: none;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
-            background: white; cursor: pointer;
-        }
+        input[type="range"] { width: 100%; height: 6px; }
 
         #feedback-btn {
-            position: fixed; bottom: 200px; right: 20px; width: 55px; height: 55px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: fixed; bottom: 200px; right: 20px; 
+            width: 55px; height: 55px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            color: white; text-decoration: none; font-size: 24px; z-index: 9999;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            color: white; text-decoration: none; font-size: 24px; z-index: 999;
         }
 
-        .premium-modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 10000; justify-content: center; align-items: center;
-            padding: 20px;
+        .loading {
+            display: inline-block; width: 20px; height: 20px;
+            border: 3px solid rgba(255,255,255,.3); border-radius: 50%;
+            border-top-color: white; animation: spin 1s ease-in-out infinite;
         }
-        .premium-content {
-            background: linear-gradient(135deg, #1e3c72 0%, #667eea 100%);
-            padding: 30px; border-radius: 20px; max-width: 400px; width: 100%;
-            border: 2px solid rgba(255,255,255,0.2);
-        }
-        .premium-title { 
-            font-size: 1.6em; margin-bottom: 10px; text-align: center;
-            background: linear-gradient(to right, #fbbf24, #f59e0b);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .price-cards { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
-        .price-card {
-            background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2);
-            border-radius: 15px; padding: 15px; cursor: pointer; position: relative;
-        }
-        .price-card.recommended { border-color: #fbbf24; }
-        .price-card.permanent { border-color: #f59e0b; }
-        .price-tag {
-            position: absolute; top: -10px; right: 10px; background: #ef4444;
-            color: white; font-size: 0.7em; padding: 3px 8px; border-radius: 10px;
-        }
-        .price-amount { font-size: 1.8em; font-weight: bold; color: #fbbf24; }
-        .btn-close-modal {
-            width: 100%; background: transparent; color: white;
-            border: 1px solid rgba(255,255,255,0.3); padding: 12px;
-            border-radius: 10px; cursor: pointer; margin-top: 15px;
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .piano-info {
+            font-size: 0.8em; opacity: 0.8; margin-top: 10px;
+            padding: 8px; background: rgba(255,255,255,0.1); border-radius: 8px;
         }
     </style>
-<base target="_blank">
 <base target="_blank">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🎹 <span data-i18n="appName">钢琴海</span></h1>
-            <p class="subtitle" data-i18n="subtitle">一键放松，与海共生</p>
+            <h1>🎹 钢琴海</h1>
+            <p class="subtitle">一键放松，与海共生</p>
         </header>
 
         <div class="ocean-selector">
-            <div class="selector-title" data-i18n="selectOcean">🌊 选择海域风格</div>
+            <div class="selector-title">🌊 选择海域风格</div>
             <div class="wave-options">
-                <button class="wave-btn active" data-ocean="mediterranean">
-                    <span class="wave-icon">🌅</span>
-                    <span class="wave-name" data-i18n="ocean1">地中海</span>
-                    <div class="wave-desc" data-i18n="ocean1Desc">轻柔绵长</div>
+                <button class="wave-btn active" onclick="selectOcean('mediterranean')">
+                    <div style="font-size: 2em;">🌅</div>
+                    <div style="font-weight: bold;">地中海</div>
+                    <div style="font-size: 0.8em; opacity: 0.8;">轻柔绵长</div>
                 </button>
-                <button class="wave-btn" data-ocean="atlantic">
-                    <span class="wave-icon">🌊</span>
-                    <span class="wave-name" data-i18n="ocean2">大西洋</span>
-                    <div class="wave-desc" data-i18n="ocean2Desc">规律舒缓</div>
+                <button class="wave-btn" onclick="selectOcean('atlantic')">
+                    <div style="font-size: 2em;">🌊</div>
+                    <div style="font-weight: bold;">大西洋</div>
+                    <div style="font-size: 0.8em; opacity: 0.8;">规律舒缓</div>
                 </button>
-                <button class="wave-btn" data-ocean="pacific">
-                    <span class="wave-icon">🏝️</span>
-                    <span class="wave-name" data-i18n="ocean3">太平洋</span>
-                    <div class="wave-desc" data-i18n="ocean3Desc">自然治愈</div>
+                <button class="wave-btn" onclick="selectOcean('pacific')">
+                    <div style="font-size: 2em;">🏝️</div>
+                    <div style="font-weight: bold;">太平洋</div>
+                    <div style="font-size: 0.8em; opacity: 0.8;">自然治愈</div>
                 </button>
             </div>
         </div>
 
         <div class="timer-selector">
-            <div class="timer-title" data-i18n="selectDuration">⏱️ 选择放松时长</div>
+            <div class="selector-title">⏱️ 选择放松时长</div>
             <div class="timer-options">
-                <button class="time-btn active" data-time="15" data-premium="false">
-                    <span data-i18n="min15">15分钟</span>
-                    <span class="free-badge" data-i18n="free">免费</span>
-                </button>
-                <button class="time-btn locked" data-time="30" data-premium="true">
-                    <span data-i18n="min30">30分钟</span>
-                    <span class="premium-badge">VIP</span>
-                </button>
-                <button class="time-btn locked" data-time="60" data-premium="true">
-                    <span data-i18n="min60">60分钟</span>
-                    <span class="premium-badge">VIP</span>
-                </button>
+                <button class="time-btn active" onclick="selectTimer(15)">15分钟</button>
+                <button class="time-btn" onclick="selectTimer(30)">30分钟</button>
+                <button class="time-btn" onclick="selectTimer(60)">60分钟</button>
             </div>
         </div>
 
         <div class="lang-switcher">
-            <button class="lang-btn active" data-lang="zh">🇨🇳 <span data-i18n="langZh">普通话</span></button>
-            <button class="lang-btn" data-lang="hk">🇭🇰 <span data-i18n="langHk">粤语</span></button>
-            <button class="lang-btn" data-lang="en">🇬🇧 <span data-i18n="langEn">English</span></button>
-            <button class="lang-btn" data-lang="es">🇪🇸 <span data-i18n="langEs">Español</span></button>
-            <button class="lang-btn" data-lang="ar">🇸🇦 <span data-i18n="langAr">العربية</span></button>
+            <button class="lang-btn active" onclick="changeLang('zh')">🇨🇳 普通话</button>
+            <button class="lang-btn" onclick="changeLang('hk')">🇭🇰 粤语</button>
+            <button class="lang-btn" onclick="changeLang('en')">🇬🇧 English</button>
+            <button class="lang-btn" onclick="changeLang('es')">🇪🇸 Español</button>
+            <button class="lang-btn" onclick="changeLang('ar')">🇸🇦 العربية</button>
         </div>
 
         <div class="scene-grid">
-            <div class="scene-card active" data-scene="anxiety">
-                <div class="scene-icon">🧘</div>
-                <div class="scene-title" data-i18n="scene1">焦虑急救</div>
-                <div class="scene-duration" data-i18n="scene1Duration">2-3分钟语音</div>
+            <div class="scene-card active" onclick="selectScene('anxiety')">
+                <div style="font-size: 2.5em;">🧘</div>
+                <div style="font-weight: bold; margin-top: 5px;">焦虑急救</div>
+                <div style="font-size: 0.8em; opacity: 0.8;">2-3分钟语音</div>
             </div>
-            <div class="scene-card" data-scene="focus">
-                <div class="scene-icon">🎯</div>
-                <div class="scene-title" data-i18n="scene2">静心专注</div>
-                <div class="scene-duration" data-i18n="scene2Duration">1分钟语音</div>
+            <div class="scene-card" onclick="selectScene('focus')">
+                <div style="font-size: 2.5em;">🎯</div>
+                <div style="font-weight: bold; margin-top: 5px;">静心专注</div>
+                <div style="font-size: 0.8em; opacity: 0.8;">1分钟语音</div>
             </div>
-            <div class="scene-card" data-scene="sleep">
-                <div class="scene-icon">🌙</div>
-                <div class="scene-title" data-i18n="scene3">睡前助眠</div>
-                <div class="scene-duration" data-i18n="scene3Duration">3-5分钟语音</div>
+            <div class="scene-card" onclick="selectScene('sleep')">
+                <div style="font-size: 2.5em;">🌙</div>
+                <div style="font-weight: bold; margin-top: 5px;">睡前助眠</div>
+                <div style="font-size: 0.8em; opacity: 0.8;">3-5分钟语音</div>
             </div>
-            <div class="scene-card" data-scene="nap">
-                <div class="scene-icon">😴</div>
-                <div class="scene-title" data-i18n="scene4">午休小憩</div>
-                <div class="scene-duration" data-i18n="scene4Duration">3分钟语音</div>
+            <div class="scene-card" onclick="selectScene('nap')">
+                <div style="font-size: 2.5em;">😴</div>
+                <div style="font-weight: bold; margin-top: 5px;">午休小憩</div>
+                <div style="font-size: 0.8em; opacity: 0.8;">3分钟语音</div>
             </div>
         </div>
 
         <div class="guide-section">
             <div class="status-box" id="statusBox">
-                <div data-i18n="currentStatus">当前：地中海 + 焦虑急救 + 普通话 + 15分钟（免费）</div>
+                当前：地中海 | 焦虑急救 | 普通话 | 15分钟
             </div>
-            <button class="play-btn-main" id="mainPlayBtn">
-                <span data-i18n="startBtn">▶️ 开始放松</span>
+            <button class="play-btn-main" id="mainPlayBtn" onclick="togglePlay()">
+                ▶️ 开始放松
             </button>
+            <div id="loadingHint" style="margin-top: 10px; font-size: 0.9em; display: none;">
+                <span class="loading"></span> 正在加载音频...
+            </div>
+            <div id="errorMsg" style="color: #ff6b6b; margin-top: 10px; font-size: 0.9em; display: none;"></div>
+
+            <div class="piano-info">
+                💡 当前钢琴曲：<span id="currentPiano">焦虑急救专用 - 舒缓版</span><br>
+                <small style="opacity: 0.7">*钢琴音乐来自互联网免版权资源，自动适配场景</small>
+            </div>
         </div>
     </div>
 
     <div class="player-controls">
         <div class="timer-big" id="timerDisplay">15:00</div>
         <div class="controls-row">
-            <button class="btn-circle" id="stopBtn" title="Stop">⏹</button>
-            <button class="btn-play-big" id="playPauseBtn">▶</button>
-            <button class="btn-circle" id="muteBtn" title="Mute">🔊</button>
+            <button class="btn-circle" onclick="stopAll()">⏹</button>
+            <button class="btn-play-big" id="playPauseBtn" onclick="togglePlay()">▶</button>
+            <button class="btn-circle" onclick="toggleMute()">🔊</button>
         </div>
         <div class="volume-grid">
             <div class="vol-item">
-                <div class="vol-label" data-i18n="volPiano">🎹 钢琴</div>
-                <input type="range" id="volPiano" min="0" max="100" value="60">
+                <div>🎹 钢琴</div>
+                <input type="range" id="volPiano" min="0" max="100" value="60" oninput="updateVolumes()">
             </div>
             <div class="vol-item">
-                <div class="vol-label" data-i18n="volWave">🌊 海浪</div>
-                <input type="range" id="volWave" min="0" max="100" value="50">
+                <div>🌊 海浪</div>
+                <input type="range" id="volWave" min="0" max="100" value="50" oninput="updateVolumes()">
             </div>
             <div class="vol-item">
-                <div class="vol-label" data-i18n="volVoice">🎙️ 语音</div>
-                <input type="range" id="volVoice" min="0" max="100" value="80">
+                <div>🎙️ 语音</div>
+                <input type="range" id="volVoice" min="0" max="100" value="80" oninput="updateVolumes()">
             </div>
         </div>
     </div>
 
-    <a href="https://forms.gle/r6znYF8Pr5ffVmAv9" target="_blank" id="feedback-btn" data-i18n-title="feedback">💬</a>
-
-    <div class="premium-modal" id="premiumModal">
-        <div class="premium-content">
-            <div class="premium-title" data-i18n="upgradeVIP">🔓 升级VIP会员</div>
-            <div style="text-align: center; margin-bottom: 20px; opacity: 0.9;" data-i18n="vipSubtitle">解锁完整放松体验</div>
-
-            <div class="price-cards">
-                <div class="price-card" onclick="selectPlan('month')">
-                    <div style="font-size: 0.8em; opacity: 0.8;" data-i18n="monthly">月度会员</div>
-                    <div><span class="price-amount">¥18</span><span style="font-size: 0.9em;">/<span data-i18n="perMonth">月</span></span></div>
-                    <div style="font-size: 0.75em; margin-top: 5px;" data-i18n="monthlyDesc">适合短期体验</div>
-                </div>
-
-                <div class="price-card recommended" onclick="selectPlan('year')">
-                    <span class="price-tag" data-i18n="recommended">推荐</span>
-                    <div style="font-size: 0.8em; opacity: 0.8;" data-i18n="yearly">年度会员</div>
-                    <div><span class="price-amount">¥238</span><span style="font-size: 0.9em;">/<span data-i18n="perYear">年</span></span></div>
-                    <div style="font-size: 0.75em; margin-top: 5px;" data-i18n="yearlyDesc">立省178元</div>
-                </div>
-
-                <div class="price-card permanent" onclick="selectPlan('permanent')">
-                    <span class="price-tag" data-i18n="bestValue">超值</span>
-                    <div style="font-size: 0.8em; opacity: 0.8;" data-i18n="permanent">永久会员</div>
-                    <div><span class="price-amount">¥498</span></div>
-                    <div style="font-size: 0.75em; margin-top: 5px;" data-i18n="permanentDesc">一次付费终身享用</div>
-                </div>
-            </div>
-
-            <ul style="font-size: 0.85em; margin: 15px 0; padding-left: 20px;">
-                <li data-i18n="vipFeature1">✓ 30/60分钟深度放松</li>
-                <li data-i18n="vipFeature2">✓ 全部5种语言完整版</li>
-                <li data-i18n="vipFeature3">✓ 3种真实海域海浪声</li>
-                <li data-i18n="vipFeature4">✓ 离线下载功能</li>
-                <li data-i18n="vipFeature5">✓ 无广告纯净体验</li>
-            </ul>
-
-            <button class="btn-close-modal" onclick="closePremium()" data-i18n="continueFree">👋 继续免费体验</button>
-        </div>
-    </div>
+    <a href="https://forms.gle/r6znYF8Pr5ffVmAv9" target="_blank" id="feedback-btn">💬</a>
 
     <script>
-    // 音频管理器 - 全局可访问
-    window.AudioManager = {
-        ctx: null,
-        piano: null,
-        wave: null,
-        voice: null,
-        isPlaying: false,
-        isMuted: false,
+        // ===== 音频文件配置 =====
+        // 1. 本地语音文件 (你已上传的)
+        const VOICE_FILES = {
+            anxiety: {
+                zh: 'audio/焦虑急救-普通话.mp3',
+                hk: 'audio/焦虑急救-粤语.mp3',
+                en: 'audio/焦虑急救-英语.mp3',
+                es: 'audio/焦虑急救-西班牙语.mp3',
+                ar: 'audio/焦虑急救-阿拉伯语.mp3'
+            },
+            focus: {
+                zh: 'audio/静心专注-普通话.mp3',
+                hk: 'audio/静心专注-粤语.mp3',
+                en: 'audio/静心专注-英语.mp3',
+                es: 'audio/静心专注-西班牙语.mp3',
+                ar: 'audio/静心专注-阿拉伯语.mp3'
+            },
+            sleep: {
+                zh: 'audio/睡前助眠-普通话.mp3',
+                hk: 'audio/睡前助眠-粤语.mp3',
+                en: 'audio/睡前助眠-英语.mp3',
+                es: 'audio/睡前助眠-西班牙语.mp3',
+                ar: 'audio/睡前助眠-阿拉伯语.mp3'
+            },
+            nap: {
+                zh: 'audio/午休小憩-普通话.mp3',
+                hk: 'audio/午休小憩-粤语.mp3',
+                en: 'audio/午休小憩-英语.mp3',
+                es: 'audio/午休小憩-西班牙语.mp3',
+                ar: 'audio/午休小憩-阿拉伯语.mp3'
+            }
+        };
 
-        // 音频源配置 - 使用在线可访问的示例音频
-        sources: {
-            piano: [
-                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',  // 示例钢琴曲1
-                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',  // 示例钢琴曲2
-                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3'   // 示例钢琴曲3
+        // 2. 本地海浪文件 (你已上传的)
+        const WAVE_FILES = {
+            mediterranean: 'audio/wave1.mp3',  // 地中海 - 轻柔
+            atlantic: 'audio/wave2.mp3',        // 大西洋 - 中等
+            pacific: 'audio/wave3.mp3'          // 太平洋 - 较强
+        };
+
+        // 3. 在线钢琴音乐 (免版权，直接播放，无需上传)
+        // 根据PDF要求为每个场景配置不同风格的钢琴曲
+        const PIANO_FILES = {
+            // 焦虑急救：旋律平缓、和弦简单，参考《River Flows in You》《秋日私语》
+            anxiety: [
+                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',  // 舒缓
+                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3'   // 柔和
             ],
-            wave: {
-                mediterranean: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3',  // 轻柔海浪
-                atlantic: 'https://cdn.pixabay.com/download/audio/2021/08/09/audio_88447e769f.mp3',        // 中等海浪
-                pacific: 'https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3'         // 强海浪
+            // 静心专注：节奏规律、无复杂变奏，参考《菊次郎的夏天》《卡农》
+            focus: [
+                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',   // 规律
+                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3'  // 稳定
+            ],
+            // 睡前助眠：慢节奏、低旋律起伏，参考《卡农》《夜的钢琴曲5》
+            sleep: [
+                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',   // 慢速
+                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3'  // 安静
+            ],
+            // 午休小憩：轻快柔和、短旋律循环，参考《童年》《梦中的婚礼》
+            nap: [
+                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',   // 轻快
+                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3'   // 柔和短曲
+            ]
+        };
+
+        const PIANO_NAMES = {
+            anxiety: 'River Flows in You - 舒缓版',
+            focus: '菊次郎的夏天 - 专注版',
+            sleep: '夜的钢琴曲5 - 助眠版',
+            nap: '童年 - 小憩版'
+        };
+
+        // ===== 状态管理 =====
+        let state = {
+            isPlaying: false,
+            isMuted: false,
+            currentOcean: 'mediterranean',
+            currentScene: 'anxiety',
+            currentLang: 'zh',
+            timer: 15,
+            currentPianoIndex: 0
+        };
+
+        let audioElements = {};
+        let timerInterval = null;
+        let remainingSeconds = 15 * 60;
+
+        // ===== 初始化音频 =====
+        function initAudio() {
+            console.log('初始化音频...');
+
+            // 1. 钢琴音频 - 根据场景选择
+            if (!audioElements.piano) {
+                const pianoUrl = PIANO_FILES[state.currentScene][state.currentPianoIndex];
+                audioElements.piano = new Audio();
+                audioElements.piano.src = pianoUrl;
+                audioElements.piano.loop = true;
+                audioElements.piano.volume = document.getElementById('volPiano').value / 100;
+                audioElements.piano.crossOrigin = 'anonymous';
+
+                audioElements.piano.oncanplay = () => console.log('✅ 钢琴音频就绪');
+                audioElements.piano.onerror = () => showError('钢琴音频加载失败，请检查网络');
             }
-        },
 
-        currentPianoIndex: 0,
-        currentOcean: 'mediterranean',
+            // 2. 海浪音频
+            if (!audioElements.wave) {
+                audioElements.wave = new Audio();
+                audioElements.wave.src = WAVE_FILES[state.currentOcean];
+                audioElements.wave.loop = true;
+                audioElements.wave.volume = document.getElementById('volWave').value / 100;
 
-        // 初始化音频上下文（针对iOS）
-        initContext: function() {
-            if (this.ctx) return;
-            try {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (AudioContext) {
-                    this.ctx = new AudioContext();
-                    if (this.ctx.state === 'suspended') {
-                        this.ctx.resume();
+                audioElements.wave.oncanplay = () => console.log('✅ 海浪音频就绪');
+                audioElements.wave.onerror = () => showError('海浪音频加载失败，请检查audio文件夹');
+            }
+
+            // 3. 语音音频
+            loadVoiceAudio();
+        }
+
+        function loadVoiceAudio() {
+            if (audioElements.voice) {
+                audioElements.voice.pause();
+                audioElements.voice = null;
+            }
+
+            const voiceUrl = VOICE_FILES[state.currentScene][state.currentLang];
+            if (!voiceUrl) {
+                showError('语音文件未找到: ' + state.currentScene + '-' + state.currentLang);
+                return;
+            }
+
+            audioElements.voice = new Audio();
+            audioElements.voice.src = voiceUrl;
+            audioElements.voice.volume = document.getElementById('volVoice').value / 100;
+
+            audioElements.voice.oncanplay = () => console.log('✅ 语音音频就绪');
+            audioElements.voice.onerror = () => {
+                console.error('语音加载失败:', voiceUrl);
+                showError('语音加载失败，请确认文件存在: ' + voiceUrl);
+            };
+
+            audioElements.voice.onended = () => {
+                console.log('语音播放结束，继续背景音乐');
+            };
+        }
+
+        // ===== 播放控制 =====
+        function togglePlay() {
+            console.log('切换播放状态:', state.isPlaying ? '暂停' : '播放');
+
+            const mainBtn = document.getElementById('mainPlayBtn');
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const loadingHint = document.getElementById('loadingHint');
+
+            if (!state.isPlaying) {
+                initAudio();
+                loadingHint.style.display = 'block';
+                hideError();
+
+                // iOS需要用户手势才能播放
+                setTimeout(() => {
+                    let playPromises = [];
+
+                    if (audioElements.piano) {
+                        playPromises.push(audioElements.piano.play().catch(e => {
+                            console.error('钢琴播放失败:', e);
+                            return false;
+                        }));
                     }
-                }
-            } catch(e) {
-                console.log('AudioContext not supported');
-            }
-        },
+                    if (audioElements.wave) {
+                        playPromises.push(audioElements.wave.play().catch(e => {
+                            console.error('海浪播放失败:', e);
+                            return false;
+                        }));
+                    }
+                    if (audioElements.voice) {
+                        playPromises.push(audioElements.voice.play().catch(e => {
+                            console.error('语音播放失败:', e);
+                            return false;
+                        }));
+                    }
 
-        // 创建音频元素
-        createAudio: function(src, loop = true, volume = 0.5) {
-            const audio = new Audio();
-            audio.src = src;
-            audio.loop = loop;
-            audio.volume = volume;
-            audio.crossOrigin = 'anonymous';  // 允许跨域
-            audio.preload = 'auto';
-            return audio;
-        },
+                    Promise.all(playPromises).then(results => {
+                        loadingHint.style.display = 'none';
+                        if (results.includes(false)) {
+                            showError('部分音频播放失败，请检查文件');
+                        } else {
+                            state.isPlaying = true;
+                            mainBtn.innerHTML = '⏸️ 暂停放松';
+                            playPauseBtn.innerHTML = '⏸';
+                            startTimer();
+                        }
+                    });
+                }, 300);
 
-        // 播放（用户点击触发）
-        play: function() {
-            this.initContext();
-
-            // iOS 需要每次都在用户手势中初始化
-            if (!this.piano) {
-                this.piano = this.createAudio(
-                    this.sources.piano[this.currentPianoIndex], 
-                    true, 
-                    document.getElementById('volPiano').value / 100
-                );
-            }
-            if (!this.wave) {
-                this.wave = this.createAudio(
-                    this.sources.wave[this.currentOcean], 
-                    true, 
-                    document.getElementById('volWave').value / 100
-                );
-            }
-
-            // 应用当前音量
-            this.updateVolumes();
-
-            // 播放所有音轨
-            const playPromises = [];
-            if (this.piano.paused) {
-                playPromises.push(this.piano.play().catch(e => console.log('Piano error:', e)));
-            }
-            if (this.wave.paused) {
-                playPromises.push(this.wave.play().catch(e => console.log('Wave error:', e)));
-            }
-
-            this.isPlaying = true;
-            return Promise.all(playPromises);
-        },
-
-        pause: function() {
-            if (this.piano) this.piano.pause();
-            if (this.wave) this.wave.pause();
-            if (this.voice) this.voice.pause();
-            this.isPlaying = false;
-        },
-
-        stop: function() {
-            this.pause();
-            if (this.piano) {
-                this.piano.currentTime = 0;
-                this.piano = null;  // 释放以允许重新初始化
-            }
-            if (this.wave) {
-                this.wave.currentTime = 0;
-                this.wave = null;
-            }
-            this.isPlaying = false;
-        },
-
-        toggleMute: function() {
-            this.isMuted = !this.isMuted;
-            const muteValue = this.isMuted ? 0 : 1;
-            if (this.piano) this.piano.muted = this.isMuted;
-            if (this.wave) this.wave.muted = this.isMuted;
-            if (this.voice) this.voice.muted = this.isMuted;
-            return this.isMuted;
-        },
-
-        updateVolumes: function() {
-            const pVol = document.getElementById('volPiano').value / 100;
-            const wVol = document.getElementById('volWave').value / 100;
-            const vVol = document.getElementById('volVoice').value / 100;
-
-            if (this.piano) this.piano.volume = pVol;
-            if (this.wave) this.wave.volume = wVol;
-            if (this.voice) this.voice.volume = vVol;
-        },
-
-        setOcean: function(oceanType) {
-            this.currentOcean = oceanType;
-            if (this.wave && this.isPlaying) {
-                const currentTime = this.wave.currentTime;
-                this.wave.src = this.sources.wave[oceanType];
-                this.wave.currentTime = currentTime % 10;  // 简单处理，避免从开头
-                this.wave.play().catch(e => console.log('Ocean switch error:', e));
-            } else if (this.wave) {
-                this.wave.src = this.sources.wave[oceanType];
-            }
-        },
-
-        changePiano: function(index) {
-            this.currentPianoIndex = index % this.sources.piano.length;
-            if (this.piano && this.isPlaying) {
-                const currentTime = this.piano.currentTime;
-                this.piano.src = this.sources.piano[this.currentPianoIndex];
-                this.piano.play().catch(e => console.log('Piano change error:', e));
+            } else {
+                pauseAll();
+                state.isPlaying = false;
+                mainBtn.innerHTML = '▶️ 继续放松';
+                playPauseBtn.innerHTML = '▶';
+                stopTimer();
             }
         }
-    };
 
-    // 翻译配置
-    const translations = {
-        zh: {
-            appName: "钢琴海", subtitle: "一键放松，与海共生",
-            selectOcean: "🌊 选择海域风格", 
-            ocean1: "地中海", ocean1Desc: "轻柔绵长",
-            ocean2: "大西洋", ocean2Desc: "规律舒缓", 
-            ocean3: "太平洋", ocean3Desc: "自然治愈",
-            selectDuration: "⏱️ 选择放松时长",
-            min15: "15分钟", min30: "30分钟", min60: "60分钟",
-            free: "免费", langZh: "普通话", langHk: "粤语",
-            langEn: "English", langEs: "Español", langAr: "العربية",
-            scene1: "焦虑急救", scene1Duration: "2-3分钟语音",
-            scene2: "静心专注", scene2Duration: "1分钟语音",
-            scene3: "睡前助眠", scene3Duration: "3-5分钟语音", 
-            scene4: "午休小憩", scene4Duration: "3分钟语音",
-            currentStatus: "当前：地中海 + 焦虑急救 + 普通话 + 15分钟（免费）",
-            startBtn: "▶️ 开始放松", pauseBtn: "⏸️ 暂停", continueBtn: "▶️ 继续",
-            volPiano: "🎹 钢琴", volWave: "🌊 海浪", volVoice: "🎙️ 语音",
-            upgradeVIP: "🔓 升级VIP会员", vipSubtitle: "解锁完整放松体验",
-            monthly: "月度会员", perMonth: "月", monthlyDesc: "适合短期体验",
-            yearly: "年度会员", perYear: "年", yearlyDesc: "立省178元",
-            permanent: "永久会员", permanentDesc: "一次付费终身享用",
-            recommended: "推荐", bestValue: "超值",
-            vipFeature1: "✓ 30/60分钟深度放松",
-            vipFeature2: "✓ 全部5种语言完整版",
-            vipFeature3: "✓ 3种真实海域海浪声",
-            vipFeature4: "✓ 离线下载功能",
-            vipFeature5: "✓ 无广告纯净体验",
-            continueFree: "👋 继续免费体验",
-            feedback: "意见反馈"
-        },
-        hk: {
-            appName: "鋼琴海", subtitle: "一鍵放鬆，與海共生",
-            selectOcean: "🌊 選擇海域風格",
-            ocean1: "地中海", ocean1Desc: "輕柔綿長",
-            ocean2: "大西洋", ocean2Desc: "規律舒緩",
-            ocean3: "太平洋", ocean3Desc: "自然治愈",
-            selectDuration: "⏱️ 選擇放鬆時長",
-            min15: "15分鐘", min30: "30分鐘", min60: "60分鐘",
-            free: "免費", langZh: "普通話", langHk: "粵語",
-            langEn: "English", langEs: "Español", langAr: "العربية",
-            scene1: "焦慮急救", scene1Duration: "2-3分鐘語音",
-            scene2: "靜心專注", scene2Duration: "1分鐘語音",
-            scene3: "睡前助眠", scene3Duration: "3-5分鐘語音",
-            scene4: "午休小憩", scene4Duration: "3分鐘語音",
-            currentStatus: "當前：地中海 + 焦慮急救 + 粵語 + 15分鐘（免費）",
-            startBtn: "▶️ 開始放鬆", pauseBtn: "⏸️ 暫停", continueBtn: "▶️ 繼續",
-            volPiano: "🎹 鋼琴", volWave: "🌊 海浪", volVoice: "🎙️ 語音",
-            upgradeVIP: "🔓 升級VIP會員", vipSubtitle: "解鎖完整放鬆體驗",
-            monthly: "月度會員", perMonth: "月", monthlyDesc: "適合短期體驗",
-            yearly: "年度會員", perYear: "年", yearlyDesc: "立省178元",
-            permanent: "永久會員", permanentDesc: "一次付費終身享用",
-            recommended: "推薦", bestValue: "超值",
-            vipFeature1: "✓ 30/60分鐘深度放鬆",
-            vipFeature2: "✓ 全部5種語言完整版",
-            vipFeature3: "✓ 3種真實海域海浪聲",
-            vipFeature4: "✓ 離線下載功能",
-            vipFeature5: "✓ 無廣告純淨體驗",
-            continueFree: "👋 繼續免費體驗",
-            feedback: "意見反饋"
-        },
-        en: {
-            appName: "Piano Sea", subtitle: "Relax with one click",
-            selectOcean: "🌊 Select Ocean Style",
-            ocean1: "Mediterranean", ocean1Desc: "Gentle & Soft",
-            ocean2: "Atlantic", ocean2Desc: "Calm & Regular",
-            ocean3: "Pacific", ocean3Desc: "Natural Healing",
-            selectDuration: "⏱️ Select Duration",
-            min15: "15 min", min30: "30 min", min60: "60 min",
-            free: "FREE", langZh: "中文", langHk: "Cantonese",
-            langEn: "English", langEs: "Español", langAr: "العربية",
-            scene1: "Anxiety Relief", scene1Duration: "2-3 min voice",
-            scene2: "Focus", scene2Duration: "1 min voice",
-            scene3: "Deep Sleep", scene3Duration: "3-5 min voice",
-            scene4: "Power Nap", scene4Duration: "3 min voice",
-            currentStatus: "Current: Mediterranean + Anxiety Relief + English + 15min (Free)",
-            startBtn: "▶️ Start Relaxing", pauseBtn: "⏸️ Pause", continueBtn: "▶️ Continue",
-            volPiano: "🎹 Piano", volWave: "🌊 Waves", volVoice: "🎙️ Voice",
-            upgradeVIP: "🔓 Upgrade to VIP", vipSubtitle: "Unlock full relaxation experience",
-            monthly: "Monthly", perMonth: "mo", monthlyDesc: "Good for short-term",
-            yearly: "Yearly", perYear: "yr", yearlyDesc: "Save ¥178",
-            permanent: "Lifetime", permanentDesc: "Pay once, enjoy forever",
-            recommended: "REC", bestValue: "BEST",
-            vipFeature1: "✓ 30/60 min deep relaxation",
-            vipFeature2: "✓ All 5 languages complete",
-            vipFeature3: "✓ 3 real ocean wave sounds",
-            vipFeature4: "✓ Offline download",
-            vipFeature5: "✓ Ad-free experience",
-            continueFree: "👋 Continue Free Experience",
-            feedback: "Feedback"
-        },
-        es: {
-            appName: "Piano Mar", subtitle: "Relájate con un clic",
-            selectOcean: "🌊 Estilo de Océano",
-            ocean1: "Mediterráneo", ocean1Desc: "Suave y Largo",
-            ocean2: "Atlántico", ocean2Desc: "Tranquilo y Regular",
-            ocean3: "Pacífico", ocean3Desc: "Sanación Natural",
-            selectDuration: "⏱️ Duración",
-            min15: "15 min", min30: "30 min", min60: "60 min",
-            free: "GRATIS", langZh: "中文", langHk: "Cantonés",
-            langEn: "English", langEs: "Español", langAr: "العربية",
-            scene1: "Alivio Ansiedad", scene1Duration: "2-3 min voz",
-            scene2: "Enfoque", scene2Duration: "1 min voz",
-            scene3: "Sueño Profundo", scene3Duration: "3-5 min voz",
-            scene4: "Siesta", scene4Duration: "3 min voz",
-            currentStatus: "Actual: Mediterráneo + Alivio + Español + 15min (Gratis)",
-            startBtn: "▶️ Empezar", pauseBtn: "⏸️ Pausa", continueBtn: "▶️ Continuar",
-            volPiano: "🎹 Piano", volWave: "🌊 Olas", volVoice: "🎙️ Voz",
-            upgradeVIP: "🔓 Actualizar a VIP", vipSubtitle: "Desbloquea experiencia completa",
-            monthly: "Mensual", perMonth: "mes", monthlyDesc: "Corto plazo",
-            yearly: "Anual", perYear: "año", yearlyDesc: "Ahorra ¥178",
-            permanent: "Permanente", permanentDesc: "Paga una vez, disfruta siempre",
-            recommended: "TOP", bestValue: "MEJOR",
-            vipFeature1: "✓ Relajación 30/60 min",
-            vipFeature2: "✓ 5 idiomas completos",
-            vipFeature3: "✓ 3 sonidos de olas reales",
-            vipFeature4: "✓ Descarga offline",
-            vipFeature5: "✓ Sin anuncios",
-            continueFree: "👋 Continuar Gratis",
-            feedback: "Comentarios"
-        },
-        ar: {
-            appName: "بيانو سي", subtitle: "استرخاء بنقرة واحدة",
-            selectOcean: "🌊 اختيار المحيط",
-            ocean1: "المتوسط", ocean1Desc: "ناعم وطويل",
-            ocean2: "الأطلسي", ocean2Desc: "هادئ ومنتظم",
-            ocean3: "الهادئ", ocean3Desc: "شفاء طبيعي",
-            selectDuration: "⏱️ المدة",
-            min15: "15 د", min30: "30 د", min60: "60 د",
-            free: "مجاني", langZh: "中文", langHk: "الكانتونية",
-            langEn: "English", langEs: "Español", langAr: "العربية",
-            scene1: "تخفيف القلق", scene1Duration: "2-3 د صوت",
-            scene2: "تركيز", scene2Duration: "1 د صوت",
-            scene3: "نوم عميق", scene3Duration: "3-5 د صوت",
-            scene4: "قيلولة", scene4Duration: "3 د صوت",
-            currentStatus: "الحالي: المتوسط + تخفيف القلق + العربية + 15د (مجاني)",
-            startBtn: "▶️ ابدأ الاسترخاء", pauseBtn: "⏸️ إيقاف مؤقت", continueBtn: "▶️ استمرار",
-            volPiano: "🎹 بيانو", volWave: "🌊 أمواج", volVoice: "🎙️ صوت",
-            upgradeVIP: "🔓 ترقية إلى VIP", vipSubtitle: "افتح تجربة الاسترخاء الكاملة",
-            monthly: "شهري", perMonth: "شهر", monthlyDesc: "قصير المدى",
-            yearly: "سنوي", perYear: "سنة", yearlyDesc: "وفر ¥178",
-            permanent: "دائم", permanentDesc: "ادفع مرة واحدة، استمتع للأبد",
-            recommended: "موصى به", bestValue: "الأفضل",
-            vipFeature1: "✓ استرخاء 30/60 د",
-            vipFeature2: "✓ 5 لغات كاملة",
-            vipFeature3: "✓ 3 أصوات أمواج حقيقية",
-            vipFeature4: "✓ تحميل بدون إنترنت",
-            vipFeature5: "✓ بدون إعلانات",
-            continueFree: "👋 متابعة مجاناً",
-            feedback: "تعليقات"
+        function pauseAll() {
+            if (audioElements.piano) audioElements.piano.pause();
+            if (audioElements.wave) audioElements.wave.pause();
+            if (audioElements.voice) audioElements.voice.pause();
         }
-    };
 
-    // 状态管理
-    let current = { lang: 'zh', scene: 'anxiety', ocean: 'mediterranean', timer: 15 };
-    let isPlaying = false;
+        function stopAll() {
+            pauseAll();
+            if (audioElements.piano) {
+                audioElements.piano.currentTime = 0;
+                audioElements.piano = null; // 重置以便切换场景时重新加载
+            }
+            if (audioElements.wave) {
+                audioElements.wave.currentTime = 0;
+            }
+            if (audioElements.voice) {
+                audioElements.voice.currentTime = 0;
+            }
 
-    // 初始化事件监听
-    document.addEventListener('DOMContentLoaded', function() {
-        // 海域选择
-        document.querySelectorAll('.wave-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                const ocean = this.getAttribute('data-ocean');
-                current.ocean = ocean;
-                document.querySelectorAll('.wave-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                updateStatus();
-                window.AudioManager.setOcean(ocean);
+            state.isPlaying = false;
+            document.getElementById('mainPlayBtn').innerHTML = '▶️ 开始放松';
+            document.getElementById('playPauseBtn').innerHTML = '▶';
+            stopTimer();
+            remainingSeconds = state.timer * 60;
+            updateTimerDisplay();
+        }
+
+        function toggleMute() {
+            state.isMuted = !state.isMuted;
+            Object.values(audioElements).forEach(audio => {
+                if (audio) audio.muted = state.isMuted;
             });
-        });
+            event.target.innerHTML = state.isMuted ? '🔇' : '🔊';
+        }
 
-        // 语言切换
-        document.querySelectorAll('.lang-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                const lang = this.getAttribute('data-lang');
-                changeLang(lang);
-                document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
+        function updateVolumes() {
+            if (audioElements.piano) audioElements.piano.volume = document.getElementById('volPiano').value / 100;
+            if (audioElements.wave) audioElements.wave.volume = document.getElementById('volWave').value / 100;
+            if (audioElements.voice) audioElements.voice.volume = document.getElementById('volVoice').value / 100;
+        }
 
-        // 场景选择
-        document.querySelectorAll('.scene-card').forEach(card => {
-            card.addEventListener('click', function(e) {
-                const scene = this.getAttribute('data-scene');
-                current.scene = scene;
-                document.querySelectorAll('.scene-card').forEach(c => c.classList.remove('active'));
-                this.classList.add('active');
-                updateStatus();
-            });
-        });
+        // ===== 场景选择 =====
+        function selectOcean(ocean) {
+            state.currentOcean = ocean;
 
-        // 时长选择
-        document.querySelectorAll('.time-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                const time = parseInt(this.getAttribute('data-time'));
-                const isPremium = this.getAttribute('data-premium') === 'true';
-
-                if (isPremium) {
-                    document.getElementById('premiumModal').style.display = 'flex';
-                    return;
+            document.querySelectorAll('.wave-btn').forEach((btn, index) => {
+                btn.classList.remove('active');
+                if ((ocean === 'mediterranean' && index === 0) ||
+                    (ocean === 'atlantic' && index === 1) ||
+                    (ocean === 'pacific' && index === 2)) {
+                    btn.classList.add('active');
                 }
-                current.timer = time;
-                document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
+            });
+
+            if (audioElements.wave) {
+                const wasPlaying = state.isPlaying;
+                audioElements.wave.src = WAVE_FILES[ocean];
+                audioElements.wave.load();
+                if (wasPlaying) {
+                    audioElements.wave.play().catch(() => {});
+                }
+            }
+
+            updateStatus();
+        }
+
+        function selectScene(scene) {
+            state.currentScene = scene;
+            state.currentPianoIndex = 0; // 重置钢琴曲索引
+
+            document.querySelectorAll('.scene-card').forEach((card, index) => {
+                card.classList.remove('active');
+                const scenes = ['anxiety', 'focus', 'sleep', 'nap'];
+                if (scenes[index] === scene) {
+                    card.classList.add('active');
+                }
+            });
+
+            // 更新显示的钢琴曲名
+            document.getElementById('currentPiano').textContent = PIANO_NAMES[scene];
+
+            // 如果正在播放，切换钢琴曲和语音
+            if (state.isPlaying) {
+                stopAll();
+                setTimeout(() => togglePlay(), 300);
+            } else {
+                // 预加载新的语音和钢琴
+                if (audioElements.piano) audioElements.piano = null;
+                loadVoiceAudio();
+            }
+
+            updateStatus();
+        }
+
+        function changeLang(lang) {
+            state.currentLang = lang;
+
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (state.isPlaying) {
+                const currentTime = audioElements.voice ? audioElements.voice.currentTime : 0;
+                loadVoiceAudio();
+                setTimeout(() => {
+                    if (audioElements.voice) {
+                        audioElements.voice.currentTime = currentTime;
+                        audioElements.voice.play().catch(() => {});
+                    }
+                }, 300);
+            } else {
+                loadVoiceAudio();
+            }
+
+            updateStatus();
+        }
+
+        function selectTimer(minutes) {
+            state.timer = minutes;
+            remainingSeconds = minutes * 60;
+            updateTimerDisplay();
+
+            document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            updateStatus();
+        }
+
+        // ===== 计时器 =====
+        function updateTimerDisplay() {
+            const mins = Math.floor(remainingSeconds / 60);
+            const secs = remainingSeconds % 60;
+            document.getElementById('timerDisplay').textContent = 
+                String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+        }
+
+        function startTimer() {
+            stopTimer();
+            timerInterval = setInterval(() => {
+                remainingSeconds--;
                 updateTimerDisplay();
-                updateStatus();
-            });
-        });
+                if (remainingSeconds <= 0) {
+                    stopAll();
+                    alert('放松时间结束！');
+                }
+            }, 1000);
+        }
 
-        // 主播放按钮
-        document.getElementById('mainPlayBtn').addEventListener('click', function(e) {
-            togglePlay();
-        });
-
-        // 播放/暂停按钮
-        document.getElementById('playPauseBtn').addEventListener('click', function(e) {
-            togglePlay();
-        });
-
-        // 停止按钮
-        document.getElementById('stopBtn').addEventListener('click', function(e) {
-            stopAll();
-        });
-
-        // 静音按钮
-        document.getElementById('muteBtn').addEventListener('click', function(e) {
-            const isMuted = window.AudioManager.toggleMute();
-            this.textContent = isMuted ? '🔇' : '🔊';
-        });
-
-        // 音量滑块
-        ['volPiano', 'volWave', 'volVoice'].forEach(id => {
-            const slider = document.getElementById(id);
-            if (slider) {
-                slider.addEventListener('input', function() {
-                    window.AudioManager.updateVolumes();
-                });
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
             }
-        });
+        }
 
-        // 初始化显示
-        updateStatus();
+        // ===== 辅助功能 =====
+        function updateStatus() {
+            const oceanNames = { mediterranean: '地中海', atlantic: '大西洋', pacific: '太平洋' };
+            const sceneNames = { anxiety: '焦虑急救', focus: '静心专注', sleep: '睡前助眠', nap: '午休小憩' };
+            const langNames = { zh: '普通话', hk: '粤语', en: '英语', es: '西班牙语', ar: '阿拉伯语' };
 
-        // iOS 音频解锁 - 监听首次触摸
-        const unlockAudio = function() {
-            window.AudioManager.initContext();
-            // 播放无声的音频来解锁
+            document.getElementById('statusBox').innerHTML = 
+                oceanNames[state.currentOcean] + ' | ' + 
+                sceneNames[state.currentScene] + ' | ' + 
+                langNames[state.currentLang] + ' | ' + 
+                state.timer + '分钟';
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('errorMsg');
+            el.textContent = msg;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 5000);
+        }
+
+        function hideError() {
+            document.getElementById('errorMsg').style.display = 'none';
+        }
+
+        // iOS音频解锁
+        document.addEventListener('click', function() {
             const silent = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=');
             silent.play().catch(() => {});
-            document.removeEventListener('touchstart', unlockAudio);
-            document.removeEventListener('click', unlockAudio);
-        };
-        document.addEventListener('touchstart', unlockAudio);
-        document.addEventListener('click', unlockAudio);
-    });
+        }, { once: true });
 
-    // 切换播放状态
-    function togglePlay() {
-        const mainBtn = document.getElementById('mainPlayBtn');
-        const playPauseBtn = document.getElementById('playPauseBtn');
-        const t = translations[current.lang];
-
-        if (!isPlaying) {
-            // 开始播放
-            window.AudioManager.play().then(() => {
-                isPlaying = true;
-                mainBtn.innerHTML = '<span>' + (t.pauseBtn || '⏸️ 暂停') + '</span>';
-                playPauseBtn.textContent = '⏸';
-                startTimer();
-            }).catch(err => {
-                console.error('Playback failed:', err);
-                alert('音频播放失败，请检查网络连接');
-            });
-        } else {
-            // 暂停
-            window.AudioManager.pause();
-            isPlaying = false;
-            mainBtn.innerHTML = '<span>' + (t.startBtn || '▶️ 开始放松') + '</span>';
-            playPauseBtn.textContent = '▶';
-            stopTimer();
-        }
-    }
-
-    // 停止全部
-    function stopAll() {
-        window.AudioManager.stop();
-        isPlaying = false;
-        const t = translations[current.lang];
-        document.getElementById('mainPlayBtn').innerHTML = '<span>' + (t.startBtn || '▶️ 开始放松') + '</span>';
-        document.getElementById('playPauseBtn').textContent = '▶';
-        resetTimer();
-    }
-
-    // 计时器逻辑
-    let timerInterval = null;
-    let remainingSeconds = 15 * 60;
-
-    function updateTimerDisplay() {
-        const mins = Math.floor(remainingSeconds / 60);
-        const secs = remainingSeconds % 60;
-        document.getElementById('timerDisplay').textContent = 
-            String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
-    }
-
-    function startTimer() {
-        stopTimer();
-        timerInterval = setInterval(() => {
-            remainingSeconds--;
-            updateTimerDisplay();
-            if (remainingSeconds <= 0) {
-                stopAll();
-                alert('放松时间结束！');
-            }
-        }, 1000);
-    }
-
-    function stopTimer() {
-        if (timerInterval) {
-            clearInterval(timerInterval);
-            timerInterval = null;
-        }
-    }
-
-    function resetTimer() {
-        stopTimer();
-        remainingSeconds = current.timer * 60;
-        updateTimerDisplay();
-    }
-
-    // 语言切换
-    function changeLang(lang) {
-        current.lang = lang;
-        const t = translations[lang];
-
-        // 更新所有带 data-i18n 的元素
-        document.querySelectorAll('[data-i18n]').forEach(el => {
-            const key = el.getAttribute('data-i18n');
-            if (t[key]) el.textContent = t[key];
-        });
-
-        // 更新页面标题
-        document.getElementById('pageTitle').textContent = t.appName + ' - ' + t.subtitle;
-
-        // RTL支持
-        document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-
-        // 更新按钮状态
-        if (isPlaying) {
-            document.getElementById('mainPlayBtn').innerHTML = '<span>' + (t.pauseBtn || '⏸️ 暂停') + '</span>';
-        }
-
+        // 初始化
         updateStatus();
-    }
-
-    // 更新状态显示
-    function updateStatus() {
-        const t = translations[current.lang];
-        const oceanNames = { mediterranean: t.ocean1, atlantic: t.ocean2, pacific: t.ocean3 };
-        const sceneNames = { anxiety: t.scene1, focus: t.scene2, sleep: t.scene3, nap: t.scene4 };
-
-        document.getElementById('statusBox').innerHTML = '<div>' + 
-            (t.selectOcean || '海域').replace('🌊 ', '') + ': ' + oceanNames[current.ocean] + ' | ' + 
-            sceneNames[current.scene] + ' | ' + current.timer + 'min' + '</div>';
-    }
-
-    // VIP 相关
-    function selectPlan(plan) {
-        alert('Selected plan: ' + plan + ' (Demo only)');
-    }
-
-    function closePremium() {
-        document.getElementById('premiumModal').style.display = 'none';
-    }
+        loadVoiceAudio();
+        document.getElementById('currentPiano').textContent = PIANO_NAMES['anxiety'];
     </script>
 </body>
 </html>
