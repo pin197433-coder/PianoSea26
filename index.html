@@ -688,7 +688,7 @@
                 audioPlayers.voice.loop = false;
                 audioPlayers.piano.volume = 0.6;
                 audioPlayers.wave.volume = 0.5;
-                audioPlayers.voice.volume = 0.9; // 语音音量稍高
+                audioPlayers.voice.volume = 0.8;
 
                 audioPlayers.piano.playsinline = true;
                 audioPlayers.wave.playsinline = true;
@@ -720,7 +720,7 @@
                 setTimeout(() => {
                     showDebug('尝试切换备用钢琴曲...');
                     switchToNextPiano();
-                }, 300);
+                }, 1000);
             };
 
             audioPlayers.wave.oncanplaythrough = function() {
@@ -894,7 +894,7 @@
                 audioPlayers.piano.src = pianoFile;
                 audioPlayers.piano.onerror = function() {
                     showDebug('主钢琴曲失败，尝试备用...');
-                    setTimeout(() => switchToNextPiano(), 100);
+                    setTimeout(() => switchToNextPiano(), 500);
                 };
 
                 audioPlayers.piano.load();
@@ -926,7 +926,7 @@
                     } catch (e) {
                         showDebug('播放错误: ' + e.message);
                     }
-                }, 200);
+                }, 500);
 
                 updateTrackInfo();
 
@@ -966,7 +966,7 @@
                     showDebug('备用钢琴曲也失败: ' + e.message);
                     // 如果还是失败，再试下一首（最多3次）
                     if (current.currentPianoIndex !== 0) {
-                        setTimeout(() => switchToNextPiano(), 100);
+                        setTimeout(() => switchToNextPiano(), 500);
                     }
                 });
             }
@@ -977,7 +977,7 @@
         
         // 智能邮件反馈（最简单方案）
         // 智能问卷反馈（腾讯问卷四语言版）
-        // 智能双渠道反馈（中文/粤语用腾讯，外语用英文Google Forms）
+        // 智能双渠道反馈（中文/粤语用腾讯，外语用Google）
         function openFeedback(e) {
             if(e) {
                 e.preventDefault();
@@ -989,10 +989,12 @@
 
             if (isChinese) {
                 // 中文/粤语用户 → 腾讯问卷（国内可访问）
-                window.open('https://wj.qq.com/s2/25778177/fb7d/', '_blank', 'noopener,noreferrer');
+                const formChinese = 'https://wj.qq.com/s2/25778177/fb7d/';
+                window.open(formChinese, '_blank', 'noopener,noreferrer');
             } else {
-                // 英语/西班牙语/阿拉伯语 → 英文Google Forms
-                window.open('https://docs.google.com/forms/d/e/1FAIpQLSc3Rp_lyBrqDgJtwE-rfcVfGDdPBB7oF9MffqonLil_wn5Dhg/viewform', '_blank', 'noopener,noreferrer');
+                // 英语/西班牙语/阿拉伯语 → Google Forms（国际通用）
+                const formGoogle = 'https://forms.gle/r6znYF8Pr5ffVmAv9';
+                window.open(formGoogle, '_blank', 'noopener,noreferrer');
             }
 
             return false;
@@ -1092,7 +1094,7 @@
                     stopAll();
                     alert(translations[current.lang].startBtn + ' - Complete!');
                 }
-            }, 300);
+            }, 1000);
         }
 
         function updateTimerDisplay() {
@@ -1138,8 +1140,18 @@
                 if (e.target === this) closePremium();
             });
 
-/* 预加载已禁用
-*/
+            // 预加载音频（延迟1秒执行，避免影响页面渲染）
+            setTimeout(preloadAudio, 1000);
+
+            showDebug('页面加载完成');
+        };
+
+        window.onbeforeunload = () => {
+            clearInterval(current.timerInterval);
+            Object.values(audioPlayers).forEach(audio => {
+                if (audio) {
+                    audio.pause();
+                    audio.src = '';
                 }
             });
         };
