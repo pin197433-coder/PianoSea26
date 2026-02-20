@@ -41,7 +41,6 @@
             background: rgba(255,255,255,0.2);
             font-size: 0.9em;
             padding: 8px 20px;
-            width: auto;
         }
 
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0; }
@@ -126,8 +125,22 @@
             justify-content: space-around;
         }
 
-        .volume-item { flex: 1; text-align: center; }
+        .volume-item {
+            flex: 1;
+            text-align: center;
+        }
+
         input[type="range"] { width: 100%; margin-top: 5px; }
+
+        .badge {
+            display: inline-block;
+            background: rgba(102, 126, 234, 0.8);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            margin-left: 5px;
+        }
     </style>
 <base target="_blank">
 </head>
@@ -148,12 +161,12 @@
         </div>
 
         <div class="card">
-            <div style="font-weight: bold; margin-bottom: 10px;">🎭 选择场景</div>
+            <div style="font-weight: bold; margin-bottom: 10px;">🎭 选择场景 <span class="badge">多曲目</span></div>
             <div class="grid">
-                <div class="item active" onclick="setScene('anxiety')">焦虑急救<br><small>3首</small></div>
-                <div class="item" onclick="setScene('focus')">静心专注<br><small>3首</small></div>
-                <div class="item" onclick="setScene('sleep')">睡前助眠<br><small>3首</small></div>
-                <div class="item" onclick="setScene('nap')">午休小憩<br><small>3首</small></div>
+                <div class="item active" onclick="setScene('anxiety')">焦虑急救<br><small>6首可选</small></div>
+                <div class="item" onclick="setScene('focus')">静心专注<br><small>4首可选</small></div>
+                <div class="item" onclick="setScene('sleep')">睡前助眠<br><small>5首可选</small></div>
+                <div class="item" onclick="setScene('nap')">午休小憩<br><small>4首可选</small></div>
             </div>
         </div>
 
@@ -168,11 +181,11 @@
 
         <div class="card">
             <div class="track-info">
-                <span>🎹 当前：<span id="currentTrack">未播放</span></span>
+                <span>🎹 当前钢琴曲：<span id="currentTrack">未播放</span></span>
                 <button class="btn-secondary" onclick="nextPiano()">换一首 ↻</button>
             </div>
 
-            <div class="status" id="statusText">准备就绪</div>
+            <div class="status" id="statusText">准备就绪 - 点击"开始"播放</div>
             <div id="errorText" class="error"></div>
             <div id="successText" class="success"></div>
 
@@ -206,36 +219,46 @@
     </div>
 
     <script>
-        // ===== 实际音频文件配置（完全匹配你的文件名） =====
+        // ===== 音频文件配置 =====
+        // 1. 本地钢琴文件（按场景分类，支持多首随机播放）
         const PIANO_FILES = {
-            anxiety: [  // 焦虑急救 - 3首
-                'piano_anxiety_BackgroundDocumentary.mp3',
-                'piano_anxiety_CalmWaves.mp3',
-                'piano_anxiety_emotional.mp3'
-            ],
-            focus: [    // 静心专注 - 3首
-                'piano_focus_minimalisticPrelude.mp3',
-                'piano_focus_scarboroughFair.mp3',
-                'piano_focus_variatio14a2clav.mp3'
-            ],
-            sleep: [    // 睡前助眠 - 3首
-                'piano_sleep_SoftPiano.mp3',
+            sleep: [  // 睡前助眠 - 5首
                 'piano_sleep_SoftPiano2.mp3',
+                'piano_sleep_SoftPiano.mp3',
+                'piano_sleep_MidnightRide.mp3',
+                'piano_sleep_meditationRelax.mp3',
                 'piano_sleep_daylight.mp3'
             ],
-            nap: [      // 午休小憩 - 3首
+            nap: [    // 午休小憩 - 4首
+                'piano_nap_nostalgic.mp3',
+                'piano_nap_morningZen.mp3',
                 'piano_nap_Inspiring.mp3',
-                'piano_nap_cafeJazz.mp3',
-                'piano_nap_morningZen.mp3'
+                'piano_nap_cafeJazz.mp3'
+            ],
+            focus: [  // 静心专注 - 4首
+                'piano_focus_variatio14a2clav.mp3',
+                'piano_focus_scarboroughFair.mp3',
+                'piano_focus_minimalisticPrelude.mp3',
+                'piano_focus_innerVoices.mp3'
+            ],
+            anxiety: [ // 焦虑急救 - 6首
+                'piano_anxiety_soothingPiano.mp3',
+                'piano_anxiety_SoftPiano.mp3',
+                'piano_anxiety_romanticMemories.mp3',
+                'piano_anxiety_melodiesEmbrace.mp3',
+                'piano_anxiety_emotional.mp3',
+                'piano_anxiety_CalmWaves.mp3'
             ]
         };
 
+        // 2. 本地海浪文件
         const WAVE_FILES = {
             mediterranean: 'audio/wave1.mp3',
             atlantic: 'audio/wave2.mp3',
-            pacific: 'audio/wave.mp3'  // wave.mp3 作为太平洋
+            pacific: 'audio/wave3.mp3'
         };
 
+        // 3. 本地语音文件
         const VOICE_FILES = {
             anxiety: { zh: 'audio/焦虑急救-普通话.mp3', hk: 'audio/焦虑急救-粤语.mp3', en: 'audio/焦虑急救-英语.mp3' },
             focus: { zh: 'audio/静心专注-普通话.mp3', hk: 'audio/静心专注-粤语.mp3', en: 'audio/静心专注-英语.mp3' },
@@ -256,34 +279,68 @@
         let timer = null;
         let remaining = 15 * 60;
 
-        function getRandomIndex(scene) {
-            return Math.floor(Math.random() * PIANO_FILES[scene].length);
+        // 获取当前场景的随机钢琴曲
+        function getRandomPiano(scene) {
+            const files = PIANO_FILES[scene];
+            const randomIndex = Math.floor(Math.random() * files.length);
+            state.currentPianoIndex = randomIndex;
+            return 'audio/' + files[randomIndex];
         }
 
-        function getCurrentPianoPath() {
-            return 'audio/' + PIANO_FILES[state.scene][state.currentPianoIndex];
-        }
-
-        function updateTrackDisplay() {
-            const file = PIANO_FILES[state.scene][state.currentPianoIndex];
-            const shortName = file.replace('piano_' + state.scene + '_', '').replace('.mp3', '');
-            document.getElementById('currentTrack').textContent = 
-                shortName + ' (' + (state.currentPianoIndex + 1) + '/' + PIANO_FILES[state.scene].length + ')';
-        }
-
+        // 获取下一首钢琴曲
         function nextPiano() {
-            const len = PIANO_FILES[state.scene].length;
-            state.currentPianoIndex = (state.currentPianoIndex + 1) % len;
+            const files = PIANO_FILES[state.scene];
+            state.currentPianoIndex = (state.currentPianoIndex + 1) % files.length;
+            const nextFile = 'audio/' + files[state.currentPianoIndex];
 
-            if (audio.piano && state.isPlaying) {
-                audio.piano.src = getCurrentPianoPath();
+            // 更新显示
+            updateTrackDisplay();
+
+            // 如果正在播放，切换到新曲目
+            if (state.isPlaying && audio.piano) {
+                audio.piano.src = nextFile;
                 audio.piano.play().catch(() => {});
             }
-            updateTrackDisplay();
-            showSuccess('切换到: ' + PIANO_FILES[state.scene][state.currentPianoIndex].replace('.mp3', ''));
+
+            showSuccess('已切换到：' + files[state.currentPianoIndex].replace('.mp3', ''));
         }
 
-        async function togglePlay() {
+        // 更新曲目显示
+        function updateTrackDisplay() {
+            const files = PIANO_FILES[state.scene];
+            const currentFile = files[state.currentPianoIndex];
+            document.getElementById('currentTrack').textContent = 
+                currentFile.replace('piano_' + state.scene + '_', '').replace('.mp3', '') + 
+                ' (' + (state.currentPianoIndex + 1) + '/' + files.length + ')';
+        }
+
+        // 初始化音频
+        function initAudio() {
+            // 1. 钢琴（随机选择一首）
+            if (!audio.piano) {
+                const pianoSrc = getRandomPiano(state.scene);
+                audio.piano = new Audio(pianoSrc);
+                audio.piano.loop = true;
+                audio.piano.volume = document.getElementById('volPiano').value / 100;
+                updateTrackDisplay();
+            }
+
+            // 2. 海浪
+            if (!audio.wave) {
+                audio.wave = new Audio(WAVE_FILES[state.ocean]);
+                audio.wave.loop = true;
+                audio.wave.volume = document.getElementById('volWave').value / 100;
+            }
+
+            // 3. 语音
+            if (!audio.voice) {
+                audio.voice = new Audio(VOICE_FILES[state.scene][state.lang]);
+                audio.voice.volume = document.getElementById('volVoice').value / 100;
+            }
+        }
+
+        // 播放控制
+        function togglePlay() {
             if (state.isPlaying) {
                 pauseAll();
                 state.isPlaying = false;
@@ -293,55 +350,21 @@
             }
 
             showError('');
-            showSuccess('加载中...');
+            initAudio();
 
-            try {
-                // 初始化钢琴（随机选择）
-                if (!audio.piano) {
-                    state.currentPianoIndex = getRandomIndex(state.scene);
-                    audio.piano = new Audio(getCurrentPianoPath());
-                    audio.piano.loop = true;
-                    audio.piano.volume = document.getElementById('volPiano').value / 100;
-                    updateTrackDisplay();
+            // 播放所有音轨
+            Promise.all([
+                audio.piano.play().catch(e => { showError('钢琴播放失败：' + e.message); return false; }),
+                audio.wave.play().catch(e => { showError('海浪播放失败：' + e.message); return false; }),
+                audio.voice.play().catch(e => { showError('语音播放失败：' + e.message); return false; })
+            ]).then(results => {
+                if (results.every(r => r !== false)) {
+                    state.isPlaying = true;
+                    updateUI();
+                    startTimer();
+                    showSuccess('开始播放！当前钢琴曲：' + PIANO_FILES[state.scene][state.currentPianoIndex].replace('.mp3', ''));
                 }
-
-                // 初始化海浪
-                if (!audio.wave) {
-                    audio.wave = new Audio(WAVE_FILES[state.ocean]);
-                    audio.wave.loop = true;
-                    audio.wave.volume = document.getElementById('volWave').value / 100;
-                }
-
-                // 初始化语音
-                if (!audio.voice) {
-                    audio.voice = new Audio(VOICE_FILES[state.scene][state.lang]);
-                    audio.voice.volume = document.getElementById('volVoice').value / 100;
-                }
-
-                // 播放
-                await Promise.all([
-                    audio.piano.play().catch(e => { 
-                        showError('钢琴失败: ' + e.message + '. 文件名: ' + getCurrentPianoPath()); 
-                        return false; 
-                    }),
-                    audio.wave.play().catch(e => { 
-                        showError('海浪失败: ' + e.message); 
-                        return false; 
-                    }),
-                    audio.voice.play().catch(e => { 
-                        showError('语音失败: ' + e.message); 
-                        return false; 
-                    })
-                ]);
-
-                state.isPlaying = true;
-                updateUI();
-                startTimer();
-                showSuccess('开始播放！');
-
-            } catch (err) {
-                showError('播放错误: ' + err.message);
-            }
+            });
         }
 
         function pauseAll() {
@@ -374,26 +397,35 @@
             if (audio.voice) audio.voice.volume = document.getElementById('volVoice').value / 100;
         }
 
+        // 场景切换
         function setOcean(ocean) {
             state.ocean = ocean;
             updateSelection();
             if (audio.wave) {
+                const wasPlaying = state.isPlaying;
                 audio.wave.src = WAVE_FILES[ocean];
-                if (state.isPlaying) audio.wave.play().catch(() => {});
+                if (wasPlaying) audio.wave.play().catch(() => {});
             }
             updateStatus();
         }
 
         function setScene(scene) {
             state.scene = scene;
-            state.currentPianoIndex = 0;
+            state.currentPianoIndex = 0; // 重置为随机选择
             updateSelection();
+
+            // 重新加载钢琴和语音
             if (audio.piano) audio.piano = null;
             if (audio.voice) audio.voice = null;
+
             if (state.isPlaying) {
                 stopAll();
                 setTimeout(togglePlay, 300);
             } else {
+                // 预加载显示曲目名
+                const files = PIANO_FILES[scene];
+                const randomIndex = Math.floor(Math.random() * files.length);
+                state.currentPianoIndex = randomIndex;
                 updateTrackDisplay();
             }
             updateStatus();
@@ -410,15 +442,19 @@
         }
 
         function updateSelection() {
+            // 简化处理：用户点击后视觉上已更新，这里只更新状态
             document.querySelectorAll('.item').forEach((el, idx) => {
                 el.classList.remove('active');
+                // 根据当前状态重新标记active（简化逻辑）
                 const scenes = ['anxiety', 'focus', 'sleep', 'nap'];
                 const oceans = ['mediterranean', 'atlantic', 'pacific'];
+
                 if (idx < 3 && oceans[idx] === state.ocean) el.classList.add('active');
                 if (idx >= 3 && scenes[idx-3] === state.scene) el.classList.add('active');
             });
         }
 
+        // 计时器
         function startTimer() {
             clearInterval(timer);
             timer = setInterval(() => {
@@ -426,7 +462,7 @@
                 updateTimer();
                 if (remaining <= 0) {
                     stopAll();
-                    alert('时间结束！');
+                    alert('放松时间结束！');
                 }
             }, 1000);
         }
@@ -453,7 +489,9 @@
         }
 
         function showError(msg) { 
-            document.getElementById('errorText').textContent = msg; 
+            const el = document.getElementById('errorText');
+            el.textContent = msg; 
+            if (msg) setTimeout(() => el.textContent = '', 5000);
         }
         function showSuccess(msg) { 
             const el = document.getElementById('successText');
