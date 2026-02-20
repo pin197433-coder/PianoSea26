@@ -330,7 +330,7 @@
         </div>
     </div>
 
-    <a href="https://forms.gle/r6znYF8Pr5ffVmAv9" target="_blank" id="feedback-btn" title="意见反馈">💬</a>
+    <a href="#" onclick="openFeedback(event)" id="feedback-btn" title="Send Feedback / 意见反馈">💬</a>
 
     <!-- VIP弹窗 -->
     <div class="premium-modal" id="premiumModal">
@@ -716,6 +716,11 @@
             audioPlayers.piano.onerror = function(e) {
                 showDebug('✗ 钢琴曲加载失败: ' + audioPlayers.piano.src);
                 console.error('钢琴错误:', e);
+                // 自动切换到下一首钢琴曲
+                setTimeout(() => {
+                    showDebug('尝试切换备用钢琴曲...');
+                    switchToNextPiano();
+                }, 1000);
             };
 
             audioPlayers.wave.oncanplaythrough = function() {
@@ -885,9 +890,12 @@
 
                 showDebug(`加载: ${current.scene}场景`);
 
+                // 设置src并添加错误处理
                 audioPlayers.piano.src = pianoFile;
-                audioPlayers.wave.src = waveFile;
-                audioPlayers.voice.src = voiceFile;
+                audioPlayers.piano.onerror = function() {
+                    showDebug('主钢琴曲失败，尝试备用...');
+                    setTimeout(() => switchToNextPiano(), 500);
+                };
 
                 audioPlayers.piano.load();
                 audioPlayers.wave.load();
@@ -942,6 +950,76 @@
             document.getElementById('trackInfo').textContent = 
                 `🎹 ${pianoName} | 🌊 ${oceanName} | 🎙️ ${scenes[current.scene].name}`;
         }
+        // 切换到下一首钢琴曲（容错机制）
+        function switchToNextPiano() {
+            if (!current.isPlaying) return;
+
+            current.currentPianoIndex = (current.currentPianoIndex + 1) % 3;
+            const newPianoFile = decodeURIComponent(audioConfig.piano[current.scene][current.currentPianoIndex]);
+
+            showDebug('切换到备用钢琴曲 #' + (current.currentPianoIndex + 1));
+
+            if (audioPlayers.piano) {
+                audioPlayers.piano.src = newPianoFile;
+                audioPlayers.piano.load();
+                audioPlayers.piano.play().catch(e => {
+                    showDebug('备用钢琴曲也失败: ' + e.message);
+                    // 如果还是失败，再试下一首（最多3次）
+                    if (current.currentPianoIndex !== 0) {
+                        setTimeout(() => switchToNextPiano(), 500);
+                    }
+                });
+            }
+
+            updateTrackInfo();
+        }
+
+        
+        // 智能邮件反馈（最简单方案）
+        function openFeedback(e) {
+            e.preventDefault();
+
+            const isChinese = (current.lang === 'zh' || current.lang === 'hk');
+            const email = 'pin197433@gmail.com';
+            let subject, body;
+
+            if (isChinese) {
+                // 中文/粤语用户
+                subject = '钢琴海APP用户反馈';
+                body = '您好，感谢您使用钢琴海APP！%0D%0A%0D%0A' +
+                       '【您的反馈类型】：Bug报错 / 功能建议 / 使用体验 / 其他%0D%0A%0D%0A' +
+                       '【具体反馈内容】：%0D%0A%0D%0A' +
+                       '【使用场景】：焦虑急救 / 静心专注 / 睡前助眠 / 午休小憩%0D%0A%0D%0A' +
+                       '【联系方式】选填（如需回访请留邮箱/微信）：%0D%0A';
+            } else {
+                // 外语用户（英语/西班牙语/阿拉伯语）
+                subject = 'Piano Sea APP Feedback';
+                body = 'Hello, thank you for using Piano Sea!%0D%0A%0D%0A' +
+                       '[Feedback Type]: Bug Report / Feature Request / User Experience / Other%0D%0A%0D%0A' +
+                       '[Your Feedback]:%0D%0A%0D%0A' +
+                       '[Scene Used]: Anxiety Relief / Focus / Deep Sleep / Power Nap%0D%0A%0D%0A' +
+                       '[Contact] Optional (email if you need reply):%0D%0A';
+            }
+
+            // 生成mailto链接并打开
+            const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${body}`;
+            window.location.href = mailtoLink;
+        }
+
+        // 预加载音频（减少切换延迟）
+        function preloadAudio() {
+            // 静默预加载所有钢琴曲的前几秒
+            Object.keys(audioConfig.piano).forEach(scene => {
+                audioConfig.piano[scene].forEach((file, index) => {
+                    const audio = new Audio();
+                    audio.src = decodeURIComponent(file);
+                    audio.preload = 'metadata'; // 只预加载元数据，不占用太多流量
+                });
+            });
+            console.log('音频元数据预加载完成');
+        }
+
+        // 页面加载完成后预加载// 强制重新加载当前场景的钢琴曲（用于修复卡住的音频）
 
         function togglePlay() {
             if (!current.isPlaying) {
@@ -1095,6 +1173,9 @@
             document.getElementById('premiumModal').addEventListener('click', function(e) {
                 if (e.target === this) closePremium();
             });
+
+            // 预加载音频（延迟1秒执行，避免影响页面渲染）
+            setTimeout(preloadAudio, 1000);
 
             showDebug('页面加载完成');
         };
