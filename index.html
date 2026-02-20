@@ -977,7 +977,7 @@
         
         // 智能邮件反馈（最简单方案）
         // 智能问卷反馈（腾讯问卷四语言版）
-        // 智能双渠道反馈（中文/粤语用腾讯，外语用Google）
+        // 智能双渠道反馈（中文/粤语用腾讯，外语用英文Google Forms）
         function openFeedback(e) {
             if(e) {
                 e.preventDefault();
@@ -989,12 +989,10 @@
 
             if (isChinese) {
                 // 中文/粤语用户 → 腾讯问卷（国内可访问）
-                const formChinese = 'https://wj.qq.com/s2/25778177/fb7d/';
-                window.open(formChinese, '_blank', 'noopener,noreferrer');
+                window.open('https://wj.qq.com/s2/25778177/fb7d/', '_blank', 'noopener,noreferrer');
             } else {
-                // 英语/西班牙语/阿拉伯语 → Google Forms（国际通用）
-                const formGoogle = 'https://forms.gle/r6znYF8Pr5ffVmAv9';
-                window.open(formGoogle, '_blank', 'noopener,noreferrer');
+                // 英语/西班牙语/阿拉伯语 → 英文Google Forms
+                window.open('https://docs.google.com/forms/d/e/1FAIpQLSc3Rp_lyBrqDgJtwE-rfcVfGDdPBB7oF9MffqonLil_wn5Dhg/viewform', '_blank', 'noopener,noreferrer');
             }
 
             return false;
