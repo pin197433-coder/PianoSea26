@@ -37,9 +37,11 @@
             margin: 5px;
             width: calc(100% - 10px);
         }
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            font-size: 0.9em;
+            padding: 8px 20px;
+            width: auto;
         }
 
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0; }
@@ -50,10 +52,12 @@
             text-align: center;
             cursor: pointer;
             border: 2px solid transparent;
+            transition: all 0.3s;
         }
         .item.active {
             border-color: white;
             background: rgba(102, 126, 234, 0.5);
+            transform: scale(1.05);
         }
 
         .status {
@@ -62,20 +66,21 @@
             border-radius: 8px;
             margin: 10px 0;
             font-size: 0.9em;
-            min-height: 40px;
         }
 
-        .error {
-            color: #ff6b6b;
+        .track-info {
+            background: rgba(255,255,255,0.1);
+            padding: 8px 12px;
+            border-radius: 20px;
             font-size: 0.85em;
-            margin-top: 5px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .success {
-            color: #4ade80;
-            font-size: 0.85em;
-            margin-top: 5px;
-        }
+        .error { color: #ff6b6b; font-size: 0.85em; margin-top: 5px; }
+        .success { color: #4ade80; font-size: 0.85em; margin-top: 5px; }
 
         .player {
             position: fixed;
@@ -121,39 +126,8 @@
             justify-content: space-around;
         }
 
-        .volume-item {
-            flex: 1;
-            text-align: center;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            margin-top: 5px;
-        }
-
-        .diagnostic {
-            background: rgba(255,255,255,0.1);
-            padding: 10px;
-            border-radius: 8px;
-            margin: 10px 0;
-            font-family: monospace;
-            font-size: 0.8em;
-            max-height: 150px;
-            overflow-y: auto;
-        }
-
-        .file-check {
-            display: flex;
-            justify-content: space-between;
-            padding: 5px;
-            margin: 3px 0;
-            background: rgba(255,255,255,0.1);
-            border-radius: 5px;
-            font-size: 0.85em;
-        }
-
-        .file-ok { color: #4ade80; }
-        .file-error { color: #ff6b6b; }
+        .volume-item { flex: 1; text-align: center; }
+        input[type="range"] { width: 100%; margin-top: 5px; }
     </style>
 <base target="_blank">
 </head>
@@ -176,10 +150,10 @@
         <div class="card">
             <div style="font-weight: bold; margin-bottom: 10px;">🎭 选择场景</div>
             <div class="grid">
-                <div class="item active" onclick="setScene('anxiety')">焦虑急救</div>
-                <div class="item" onclick="setScene('focus')">静心专注</div>
-                <div class="item" onclick="setScene('sleep')">睡前助眠</div>
-                <div class="item" onclick="setScene('nap')">午休小憩</div>
+                <div class="item active" onclick="setScene('anxiety')">焦虑急救<br><small>3首</small></div>
+                <div class="item" onclick="setScene('focus')">静心专注<br><small>3首</small></div>
+                <div class="item" onclick="setScene('sleep')">睡前助眠<br><small>3首</small></div>
+                <div class="item" onclick="setScene('nap')">午休小憩<br><small>3首</small></div>
             </div>
         </div>
 
@@ -193,32 +167,18 @@
         </div>
 
         <div class="card">
-            <div class="status" id="statusText">准备就绪 - 点击"开始"播放音频</div>
+            <div class="track-info">
+                <span>🎹 当前：<span id="currentTrack">未播放</span></span>
+                <button class="btn-secondary" onclick="nextPiano()">换一首 ↻</button>
+            </div>
+
+            <div class="status" id="statusText">准备就绪</div>
             <div id="errorText" class="error"></div>
             <div id="successText" class="success"></div>
 
             <button class="btn" id="mainBtn" onclick="togglePlay()" style="margin-top: 10px;">
                 ▶️ 开始放松
             </button>
-
-            <button class="btn" onclick="checkFiles()" style="background: rgba(255,255,255,0.2); margin-top: 10px;">
-                🔍 检查音频文件
-            </button>
-        </div>
-
-        <div class="card" id="diagnosticCard" style="display: none;">
-            <div style="font-weight: bold; margin-bottom: 10px;">📋 文件检查报告</div>
-            <div id="fileList"></div>
-        </div>
-
-        <div class="card">
-            <div style="font-weight: bold; margin-bottom: 10px;">📝 使用说明</div>
-            <div style="font-size: 0.9em; line-height: 1.6;">
-                1. 确保已上传音频文件到 audio/ 文件夹<br>
-                2. 文件名必须完全匹配（区分大小写）<br>
-                3. 支持的格式：MP3, WAV<br>
-                4. 如果无声，点击"检查音频文件"查看详情
-            </div>
         </div>
     </div>
 
@@ -246,27 +206,41 @@
     </div>
 
     <script>
-        // 音频配置
-        const CONFIG = {
-            // 使用可靠的在线音频作为备选
-            online: {
-                piano: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-                wave: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3'
-            },
-            // 本地文件路径
-            local: {
-                voice: {
-                    anxiety: { zh: 'audio/焦虑急救-普通话.mp3', hk: 'audio/焦虑急救-粤语.mp3', en: 'audio/焦虑急救-英语.mp3' },
-                    focus: { zh: 'audio/静心专注-普通话.mp3', hk: 'audio/静心专注-粤语.mp3', en: 'audio/静心专注-英语.mp3' },
-                    sleep: { zh: 'audio/睡前助眠-普通话.mp3', hk: 'audio/睡前助眠-粤语.mp3', en: 'audio/睡前助眠-英语.mp3' },
-                    nap: { zh: 'audio/午休小憩-普通话.mp3', hk: 'audio/午休小憩-粤语.mp3', en: 'audio/午休小憩-英语.mp3' }
-                },
-                wave: {
-                    mediterranean: 'audio/wave1.mp3',
-                    atlantic: 'audio/wave2.mp3',
-                    pacific: 'audio/wave3.mp3'
-                }
-            }
+        // ===== 实际音频文件配置（完全匹配你的文件名） =====
+        const PIANO_FILES = {
+            anxiety: [  // 焦虑急救 - 3首
+                'piano_anxiety_BackgroundDocumentary.mp3',
+                'piano_anxiety_CalmWaves.mp3',
+                'piano_anxiety_emotional.mp3'
+            ],
+            focus: [    // 静心专注 - 3首
+                'piano_focus_minimalisticPrelude.mp3',
+                'piano_focus_scarboroughFair.mp3',
+                'piano_focus_variatio14a2clav.mp3'
+            ],
+            sleep: [    // 睡前助眠 - 3首
+                'piano_sleep_SoftPiano.mp3',
+                'piano_sleep_SoftPiano2.mp3',
+                'piano_sleep_daylight.mp3'
+            ],
+            nap: [      // 午休小憩 - 3首
+                'piano_nap_Inspiring.mp3',
+                'piano_nap_cafeJazz.mp3',
+                'piano_nap_morningZen.mp3'
+            ]
+        };
+
+        const WAVE_FILES = {
+            mediterranean: 'audio/wave1.mp3',
+            atlantic: 'audio/wave2.mp3',
+            pacific: 'audio/wave.mp3'  // wave.mp3 作为太平洋
+        };
+
+        const VOICE_FILES = {
+            anxiety: { zh: 'audio/焦虑急救-普通话.mp3', hk: 'audio/焦虑急救-粤语.mp3', en: 'audio/焦虑急救-英语.mp3' },
+            focus: { zh: 'audio/静心专注-普通话.mp3', hk: 'audio/静心专注-粤语.mp3', en: 'audio/静心专注-英语.mp3' },
+            sleep: { zh: 'audio/睡前助眠-普通话.mp3', hk: 'audio/睡前助眠-粤语.mp3', en: 'audio/睡前助眠-英语.mp3' },
+            nap: { zh: 'audio/午休小憩-普通话.mp3', hk: 'audio/午休小憩-粤语.mp3', en: 'audio/午休小憩-英语.mp3' }
         };
 
         let state = {
@@ -275,180 +249,98 @@
             ocean: 'mediterranean',
             scene: 'anxiety',
             lang: 'zh',
-            useOnlineAudio: false  // 如果本地文件失败，切换到在线音频
+            currentPianoIndex: 0
         };
 
         let audio = {};
         let timer = null;
         let remaining = 15 * 60;
 
-        // 初始化
-        function init() {
-            updateStatus();
-            // 预加载检查
-            setTimeout(checkFiles, 1000);
+        function getRandomIndex(scene) {
+            return Math.floor(Math.random() * PIANO_FILES[scene].length);
         }
 
-        // 检查文件是否存在
-        function checkFiles() {
-            const card = document.getElementById('diagnosticCard');
-            const list = document.getElementById('fileList');
-            card.style.display = 'block';
-            list.innerHTML = '<div>正在检查文件...</div>';
+        function getCurrentPianoPath() {
+            return 'audio/' + PIANO_FILES[state.scene][state.currentPianoIndex];
+        }
 
-            const filesToCheck = [];
+        function updateTrackDisplay() {
+            const file = PIANO_FILES[state.scene][state.currentPianoIndex];
+            const shortName = file.replace('piano_' + state.scene + '_', '').replace('.mp3', '');
+            document.getElementById('currentTrack').textContent = 
+                shortName + ' (' + (state.currentPianoIndex + 1) + '/' + PIANO_FILES[state.scene].length + ')';
+        }
 
-            // 检查海浪文件
-            Object.entries(CONFIG.local.wave).forEach(([key, path]) => {
-                filesToCheck.push({ name: `海浪-${key}`, path: path });
-            });
+        function nextPiano() {
+            const len = PIANO_FILES[state.scene].length;
+            state.currentPianoIndex = (state.currentPianoIndex + 1) % len;
 
-            // 检查语音文件（仅检查当前场景）
-            Object.entries(CONFIG.local.voice[state.scene]).forEach(([lang, path]) => {
-                filesToCheck.push({ name: `语音-${lang}`, path: path });
-            });
-
-            let results = [];
-            let checked = 0;
-
-            filesToCheck.forEach(file => {
-                const audioTest = new Audio();
-                audioTest.src = file.path;
-
-                audioTest.oncanplay = () => {
-                    results.push(`<div class="file-check"><span>${file.name}</span><span class="file-ok">✓ 正常</span></div>`);
-                    checked++;
-                    if (checked === filesToCheck.length) showResults();
-                };
-
-                audioTest.onerror = () => {
-                    results.push(`<div class="file-check"><span>${file.name}</span><span class="file-error">✗ 缺失或无法访问</span></div>`);
-                    checked++;
-                    if (checked === filesToCheck.length) showResults();
-                };
-
-                // 5秒超时
-                setTimeout(() => {
-                    if (checked < filesToCheck.length) {
-                        results.push(`<div class="file-check"><span>${file.name}</span><span class="file-error">✗ 加载超时</span></div>`);
-                        checked++;
-                        if (checked === filesToCheck.length) showResults();
-                    }
-                }, 5000);
-            });
-
-            function showResults() {
-                list.innerHTML = results.join('');
-                const hasErrors = results.some(r => r.includes('file-error'));
-                if (hasErrors) {
-                    showError('部分文件检查失败，建议使用在线音频模式（点击下方按钮）');
-                    list.innerHTML += '<button class="btn" onclick="useOnlineMode()" style="margin-top: 10px;">切换到在线音频模式</button>';
-                } else {
-                    showSuccess('所有文件检查通过！');
-                }
+            if (audio.piano && state.isPlaying) {
+                audio.piano.src = getCurrentPianoPath();
+                audio.piano.play().catch(() => {});
             }
+            updateTrackDisplay();
+            showSuccess('切换到: ' + PIANO_FILES[state.scene][state.currentPianoIndex].replace('.mp3', ''));
         }
 
-        function useOnlineMode() {
-            state.useOnlineAudio = true;
-            showSuccess('已切换到在线音频模式（无需本地文件）');
-            updateStatus();
-        }
-
-        // 播放控制
-        function togglePlay() {
+        async function togglePlay() {
             if (state.isPlaying) {
                 pauseAll();
                 state.isPlaying = false;
-                updateUI('暂停');
+                updateUI();
                 clearInterval(timer);
-            } else {
-                playAll();
+                return;
             }
-        }
 
-        function playAll() {
             showError('');
-            showSuccess('正在初始化音频...');
+            showSuccess('加载中...');
 
-            // 确定音频源
-            const pianoSrc = state.useOnlineAudio ? CONFIG.online.piano : CONFIG.online.piano; // 钢琴一直用在线
-            const waveSrc = state.useOnlineAudio ? CONFIG.online.wave : CONFIG.local.wave[state.ocean];
-            const voiceSrc = state.useOnlineAudio ? null : CONFIG.local.voice[state.scene][state.lang];
+            try {
+                // 初始化钢琴（随机选择）
+                if (!audio.piano) {
+                    state.currentPianoIndex = getRandomIndex(state.scene);
+                    audio.piano = new Audio(getCurrentPianoPath());
+                    audio.piano.loop = true;
+                    audio.piano.volume = document.getElementById('volPiano').value / 100;
+                    updateTrackDisplay();
+                }
 
-            // 创建音频对象
-            if (!audio.piano) {
-                audio.piano = new Audio(pianoSrc);
-                audio.piano.loop = true;
-                audio.piano.volume = document.getElementById('volPiano').value / 100;
-                audio.piano.crossOrigin = 'anonymous';
-            }
+                // 初始化海浪
+                if (!audio.wave) {
+                    audio.wave = new Audio(WAVE_FILES[state.ocean]);
+                    audio.wave.loop = true;
+                    audio.wave.volume = document.getElementById('volWave').value / 100;
+                }
 
-            if (!audio.wave || audio.wave.src !== waveSrc) {
-                audio.wave = new Audio(waveSrc);
-                audio.wave.loop = true;
-                audio.wave.volume = document.getElementById('volWave').value / 100;
-            }
-
-            if (!state.useOnlineAudio && voiceSrc) {
-                if (!audio.voice || audio.voice.src !== voiceSrc) {
-                    audio.voice = new Audio(voiceSrc);
+                // 初始化语音
+                if (!audio.voice) {
+                    audio.voice = new Audio(VOICE_FILES[state.scene][state.lang]);
                     audio.voice.volume = document.getElementById('volVoice').value / 100;
                 }
-            }
 
-            // 播放
-            let playCount = 0;
-            let errorCount = 0;
-            const totalTracks = state.useOnlineAudio ? 2 : 3;
+                // 播放
+                await Promise.all([
+                    audio.piano.play().catch(e => { 
+                        showError('钢琴失败: ' + e.message + '. 文件名: ' + getCurrentPianoPath()); 
+                        return false; 
+                    }),
+                    audio.wave.play().catch(e => { 
+                        showError('海浪失败: ' + e.message); 
+                        return false; 
+                    }),
+                    audio.voice.play().catch(e => { 
+                        showError('语音失败: ' + e.message); 
+                        return false; 
+                    })
+                ]);
 
-            function checkComplete() {
-                playCount++;
-                if (playCount + errorCount === totalTracks) {
-                    if (errorCount === 0) {
-                        state.isPlaying = true;
-                        updateUI('播放中');
-                        showSuccess('音频播放成功！');
-                        startTimer();
-                    } else {
-                        showError(`${errorCount}个音频播放失败，建议点击"检查音频文件"查看详情`);
-                    }
-                }
-            }
+                state.isPlaying = true;
+                updateUI();
+                startTimer();
+                showSuccess('开始播放！');
 
-            // 播放钢琴
-            audio.piano.play().then(() => {
-                showSuccess('钢琴音乐播放成功');
-                checkComplete();
-            }).catch(err => {
-                console.error('钢琴播放失败:', err);
-                showError('钢琴音频播放失败: ' + err.message);
-                errorCount++;
-                checkComplete();
-            });
-
-            // 播放海浪
-            audio.wave.play().then(() => {
-                showSuccess('海浪声音播放成功');
-                checkComplete();
-            }).catch(err => {
-                console.error('海浪播放失败:', err);
-                showError('海浪音频播放失败，请检查文件: ' + waveSrc);
-                errorCount++;
-                checkComplete();
-            });
-
-            // 播放语音（如果使用本地模式）
-            if (!state.useOnlineAudio && audio.voice) {
-                audio.voice.play().then(() => {
-                    showSuccess('语音播放成功');
-                    checkComplete();
-                }).catch(err => {
-                    console.error('语音播放失败:', err);
-                    showError('语音播放失败，建议切换到在线模式');
-                    errorCount++;
-                    checkComplete();
-                });
+            } catch (err) {
+                showError('播放错误: ' + err.message);
             }
         }
 
@@ -460,21 +352,20 @@
 
         function stopAll() {
             pauseAll();
-            if (audio.piano) audio.piano.currentTime = 0;
-            if (audio.wave) audio.wave.currentTime = 0;
-            if (audio.voice) audio.voice.currentTime = 0;
+            if (audio.piano) { audio.piano.currentTime = 0; audio.piano = null; }
+            if (audio.wave) { audio.wave.currentTime = 0; audio.wave = null; }
+            if (audio.voice) { audio.voice.currentTime = 0; audio.voice = null; }
             state.isPlaying = false;
             remaining = 15 * 60;
             updateTimer();
-            updateUI('已停止');
+            updateUI();
             clearInterval(timer);
+            document.getElementById('currentTrack').textContent = '未播放';
         }
 
         function toggleMute() {
             state.isMuted = !state.isMuted;
-            Object.values(audio).forEach(a => {
-                if (a) a.muted = state.isMuted;
-            });
+            Object.values(audio).forEach(a => { if (a) a.muted = state.isMuted; });
         }
 
         function updateVolumes() {
@@ -483,42 +374,51 @@
             if (audio.voice) audio.voice.volume = document.getElementById('volVoice').value / 100;
         }
 
-        // 场景设置
         function setOcean(ocean) {
             state.ocean = ocean;
-            document.querySelectorAll('.item')[0].parentElement.querySelectorAll('.item').forEach((el, i) => {
-                el.classList.toggle('active', i === ['mediterranean', 'atlantic', 'pacific'].indexOf(ocean));
-            });
-            if (state.isPlaying) {
-                stopAll();
-                setTimeout(playAll, 300);
+            updateSelection();
+            if (audio.wave) {
+                audio.wave.src = WAVE_FILES[ocean];
+                if (state.isPlaying) audio.wave.play().catch(() => {});
             }
             updateStatus();
         }
 
         function setScene(scene) {
             state.scene = scene;
-            const scenes = ['anxiety', 'focus', 'sleep', 'nap'];
-            document.querySelectorAll('.item')[3].parentElement.querySelectorAll('.item').forEach((el, i) => {
-                el.classList.toggle('active', i === scenes.indexOf(scene));
-            });
+            state.currentPianoIndex = 0;
+            updateSelection();
+            if (audio.piano) audio.piano = null;
+            if (audio.voice) audio.voice = null;
             if (state.isPlaying) {
                 stopAll();
-                setTimeout(playAll, 300);
+                setTimeout(togglePlay, 300);
+            } else {
+                updateTrackDisplay();
             }
             updateStatus();
         }
 
         function setLang(lang) {
             state.lang = lang;
-            if (state.isPlaying && !state.useOnlineAudio) {
+            if (audio.voice) audio.voice = null;
+            if (state.isPlaying) {
                 stopAll();
-                setTimeout(playAll, 300);
+                setTimeout(togglePlay, 300);
             }
             updateStatus();
         }
 
-        // 计时器
+        function updateSelection() {
+            document.querySelectorAll('.item').forEach((el, idx) => {
+                el.classList.remove('active');
+                const scenes = ['anxiety', 'focus', 'sleep', 'nap'];
+                const oceans = ['mediterranean', 'atlantic', 'pacific'];
+                if (idx < 3 && oceans[idx] === state.ocean) el.classList.add('active');
+                if (idx >= 3 && scenes[idx-3] === state.scene) el.classList.add('active');
+            });
+        }
+
         function startTimer() {
             clearInterval(timer);
             timer = setInterval(() => {
@@ -526,7 +426,7 @@
                 updateTimer();
                 if (remaining <= 0) {
                     stopAll();
-                    alert('时间到！');
+                    alert('时间结束！');
                 }
             }, 1000);
         }
@@ -537,38 +437,33 @@
             document.getElementById('timerDisplay').textContent = `${m}:${s}`;
         }
 
-        // UI更新
         function updateStatus() {
             const names = {
                 ocean: { mediterranean: '地中海', atlantic: '大西洋', pacific: '太平洋' },
                 scene: { anxiety: '焦虑急救', focus: '静心专注', sleep: '睡前助眠', nap: '午休小憩' },
                 lang: { zh: '普通话', hk: '粤语', en: '英语' }
             };
-            const mode = state.useOnlineAudio ? '[在线模式]' : '[本地模式]';
             document.getElementById('statusText').textContent = 
-                `${mode} ${names.ocean[state.ocean]} | ${names.scene[state.scene]} | ${names.lang[state.lang]}`;
+                `${names.ocean[state.ocean]} | ${names.scene[state.scene]} | ${names.lang[state.lang]}`;
         }
 
-        function updateUI(status) {
+        function updateUI() {
             document.getElementById('mainBtn').textContent = state.isPlaying ? '⏸️ 暂停放松' : '▶️ 开始放松';
             document.getElementById('playBtn').textContent = state.isPlaying ? '⏸' : '▶';
         }
 
-        function showError(msg) {
-            document.getElementById('errorText').textContent = msg;
+        function showError(msg) { 
+            document.getElementById('errorText').textContent = msg; 
+        }
+        function showSuccess(msg) { 
+            const el = document.getElementById('successText');
+            el.textContent = msg; 
+            setTimeout(() => el.textContent = '', 3000);
         }
 
-        function showSuccess(msg) {
-            document.getElementById('successText').textContent = msg;
-            setTimeout(() => {
-                if (document.getElementById('successText').textContent === msg) {
-                    document.getElementById('successText').textContent = '';
-                }
-            }, 3000);
-        }
-
-        // 启动
-        init();
+        // 初始化
+        updateStatus();
+        updateTrackDisplay();
     </script>
 </body>
 </html>
